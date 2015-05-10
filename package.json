@@ -1,0 +1,71 @@
+{
+  "name": "angular-inject-templates",
+  "version": "0.1.0",
+  "description": "a gulp plugin to embedding angular template in directive js file",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec -t 200 test/*.js",
+    "test-cov": "istanbul cover node_modules/.bin/_mocha -- -R dot -t 200 test/*.js",
+    "test-travis": "istanbul cover node_modules/.bin/_mocha --report lcovonly -- -R dot -t 200 test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/chekulaevalexey/angular-inject-templates.git"
+  },
+  "keywords": [
+    "gulpplugin",
+    "file",
+    "include",
+    "replace",
+    "gulp",
+    "plugin"
+  ],
+  "author": {
+    "name": "Alexey Chekulaev"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chekulaevalexey/angular-inject-templates/issues"
+  },
+  "homepage": "https://github.com/chekulaevalexey/angular-inject-templates",
+  "devDependencies": {
+  },
+  "dependencies": {
+    "through2": "^0.6.5",
+    "gulp-util": "^3.0.4",
+    "path": "0.11.14",
+    "fs": "0.0.2",
+    "minimize": "1.4.1",
+    "js-string-escape": "1.0.0"
+  },
+  "files": [
+    "index.js",
+    "Readme.md"
+  ],
+  "directories": {
+    "example": "example",
+    "test": "test"
+  },
+  "gitHead": "95b8e1071f54cb27d57ce0ae5b5b788332cc4727",
+  "_id": "gulp-file-include@0.9.0",
+  "_shasum": "79d70e295244507f6a495fcb3fc5a591f7019b5b",
+  "_from": "gulp-file-include@>=0.9.0 <0.10.0",
+  "_npmVersion": "2.7.6",
+  "_nodeVersion": "1.7.1",
+  "_npmUser": {
+    "name": "coderhaoxin",
+    "email": "coderhaoxin@outlook.com"
+  },
+  "maintainers": [
+    {
+      "name": "coderhaoxin",
+      "email": "coderhaoxin@outlook.com"
+    }
+  ],
+  "dist": {
+    "shasum": "79d70e295244507f6a495fcb3fc5a591f7019b5b",
+    "tarball": "http://registry.npmjs.org/gulp-file-include/-/gulp-file-include-0.9.0.tgz"
+  },
+  "_resolved": "https://registry.npmjs.org/gulp-file-include/-/gulp-file-include-0.9.0.tgz",
+  "readme": "ERROR: No README data found!"
+}
