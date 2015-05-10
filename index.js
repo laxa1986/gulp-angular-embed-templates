@@ -18,38 +18,40 @@ module.exports = function (options) {
         options.brakeOnErrors = true;
     }
 
-    const DIRECTIVE_SUFFIX = 'r-directive.js';
-
-    function isDirective(filename) {
-        var position = filename.length - DIRECTIVE_SUFFIX.length;
-        var lastIndex = filename.indexOf(DIRECTIVE_SUFFIX, position);
-        return lastIndex !== -1 && lastIndex === position;
-    }
-
     var minimizer = new Minimize(options.minimize);
 
-    const TEMPLATE_PATTERN = /templateUrl:[\W]*['"]([^'"]+)['"]/;
-    const CODE_EXIT = 0;
-    const CODE_CAN_GO_NEXT = 1;
+    // regexp uses 'g' flag to be able to match several occurrences
+    // so it should be reset for each file
+    const TEMPLATE_URL_PATTERN = 'templateUrl:[\\s]*[\'"]([^\'"]+)[\'"]';
+
+    // variables which reset for each file
+    var content;
+    var templateUrlRegexp;
+
+    const FOUND_SUCCESS = {};
+    const FOUND_ERROR = {};
+    const CODE_EXIT = {};
+
+    const TEMPLATE_BEGIN = Buffer('template:\'');
+    const TEMPLATE_END = Buffer('\'');
 
     /**
      * replace one template url with minified template text
-     * @param {String} base
-     * @param {String} content
+     * @param {String} filePath
      * @param {Function} cb
      */
-    function replace(base, content, cb) {
-        var matches = TEMPLATE_PATTERN.exec(content);
+    function replace(filePath, cb) {
+        var matches = templateUrlRegexp.exec(content);
 
         console.log('matches: ' + matches);
 
         if (matches === null) {
-            cb(CODE_EXIT, content);
+            cb(CODE_EXIT);
             return;
         }
 
         var relativeTemplatePath = matches[1];
-        var path = pathModule.join(base, relativeTemplatePath);
+        var path = pathModule.join(filePath, relativeTemplatePath);
 
         console.log('template path: ' + path);
 
@@ -61,12 +63,10 @@ module.exports = function (options) {
                     throw new PluginError(PLUGIN_NAME, errMsg);
                 } else {
                     gutil.log(PLUGIN_NAME, '[WARN]', gutil.colors.magenta(errMsg));
-                    cb(CODE_EXIT, content);
+                    cb(FOUND_ERROR);
                     return;
                 }
             }
-
-            console.log('templateContent: ' + templateContent);
 
             minimizer.parse(templateContent, function (err, minifiedContent) {
                 if (err) {
@@ -75,21 +75,35 @@ module.exports = function (options) {
                         throw new PluginError(PLUGIN_NAME, errMsg);
                     } else {
                         gutil.log(PLUGIN_NAME, '[WARN]', gutil.colors.magenta(errMsg));
-                        cb(CODE_EXIT, content);
+                        cb(FOUND_ERROR);
                         return;
                     }
                 }
 
-                var before = content.substr(0, matches.index);
-                var template = jsStringEscape(minifiedContent);
-                var after = content.substr(matches.index + matches[0].length);
-                var newContent = before + 'template:\'' + template + '\'' + after;
-
-                console.log('newContent: ' + newContent);
-
-                cb(CODE_CAN_GO_NEXT, newContent);
+                cb(FOUND_SUCCESS, {
+                    regexpMatch : matches,
+                    template: minifiedContent
+                });
             });
         });
+    }
+
+    function joinParts(entrances) {
+        var parts = [];
+        var index = 0;
+        for (var i=0; i<entrances.length; i++) {
+            var entrance = entrances[i];
+            var matches = entrance.regexpMatch;
+
+            parts.push(Buffer(content.substring(index, matches.index)));
+            parts.push(TEMPLATE_BEGIN);
+            parts.push(Buffer(jsStringEscape(entrance.template)));
+            parts.push(TEMPLATE_END);
+
+            index = matches.index + matches[0].length;
+        }
+        parts.push(Buffer(content.substr(index)));
+        return Buffer.concat(parts);
     }
 
     function transform(file, enc, cb) {
@@ -103,25 +117,32 @@ module.exports = function (options) {
             throw new PluginError(PLUGIN_NAME, 'Streaming not supported. particular file: ' + file.path);
         }
 
-        // check that file name ends with '-directive.js'
-        if (!isDirective(file.path)) {
-            cb(null, file);
-            return;
-        }
+        content = file.contents.toString('utf8');
+        templateUrlRegexp = new RegExp(TEMPLATE_URL_PATTERN, 'g');
+        var entrances = [];
 
         console.log('file.path: ' + file.path);
 
-        var content = file.contents.toString('utf8');
         var base = pathModule.dirname(file.path);
-        replace(base, content, replaceCallback);
+        replace(base, replaceCallback);
 
-        function replaceCallback(code, content) {
-            if (code === CODE_CAN_GO_NEXT) {
-                replace(base, content, replaceCallback);
+        function replaceCallback(code, entrance) {
+            if (code === FOUND_SUCCESS) {
+                entrances.push(entrance);
+                replace(base, replaceCallback);
                 return;
             }
-            // code === CODE_EXIT
-            file.contents = new Buffer(content);
+
+            if (code === FOUND_ERROR) {
+                replace(base, replaceCallback);
+                return
+            }
+
+            /* if (code === CODE_EXIT) */
+            if (entrances.length) {
+                file.contents = joinParts(entrances);
+            }
+
             cb(null, file);
         }
     }
