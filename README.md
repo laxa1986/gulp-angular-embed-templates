@@ -1,7 +1,7 @@
 # angular-inject-templates
 gulp plugin to include the contents of angular templates inside directive's code
 
-Plugin searches for <i>templateUrl: {template url}</i> and replace it with <i>template: {minified template content}</i>. To archive this template first minified with [minimize](https://www.npmjs.com/package/minimize)
+Plugin searches for `templateUrl: {template url}` and replace it with `template: {minified template content}`. To archive this template first minified with [minimize](https://www.npmjs.com/package/minimize)
 
 Nearest neighbours are:
 
@@ -63,6 +63,7 @@ gulp.task('js:build', function () {
 
 #### options.minimize
 Type: `Object`
+Default value: '{}'
 
 settings to pass in minimize plugin. Please see all settings on [minimize official page](https://www.npmjs.com/package/minimize)
 
@@ -70,7 +71,7 @@ settings to pass in minimize plugin. Please see all settings on [minimize offici
 Type: `Boolean`
 Default value: 'false'
 
-default=false should plugin brake on errors (file not found, error in minification) or skip errors and go to next template
+should plugin brake on errors (file not found, error in minification) or skip errors and go to next template
 
 ## License
 This module is released under the MIT license.
