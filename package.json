@@ -4,6 +4,7 @@
   "description": "gulp plugin to include the contents of angular templates inside directive's code",
   "main": "index.js",
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -21,7 +22,7 @@
     "templates"
   ],
   "author": {
-    "name": "Alexey Chekulaev"
+    "name": "Alexey Chekulaev <chekulaevalexey@gmail.com>"
   },
   "license": "MIT",
   "bugs": {
