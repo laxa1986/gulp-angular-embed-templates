@@ -1,6 +1,6 @@
 {
   "name": "angular-inject-templates",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "gulp plugin to include the contents of angular templates inside directive's code",
   "main": "index.js",
   "scripts": {
@@ -29,8 +29,7 @@
     "url": "https://github.com/laxa1986/angular-inject-templates/issues"
   },
   "homepage": "https://github.com/laxa1986/angular-inject-templates",
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "dependencies": {
     "through2": "^0.6.5",
     "gulp-util": "^3.0.4",
@@ -43,8 +42,7 @@
     "index.js",
     "Readme.md"
   ],
-  "directories": {
-  },
+  "directories": {},
   "_npmVersion": "2.7.4",
   "_nodeVersion": "0.12.2"
 }
