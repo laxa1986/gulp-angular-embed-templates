@@ -1,33 +1,33 @@
 {
   "name": "angular-inject-templates",
   "version": "0.1.0",
-  "description": "a gulp plugin to embedding angular template in directive js file",
+  "description": "gulp plugin to include the contents of angular templates inside directive's code",
   "main": "index.js",
   "scripts": {
-    "test": "mocha -R spec -t 200 test/*.js",
-    "test-cov": "istanbul cover node_modules/.bin/_mocha -- -R dot -t 200 test/*.js",
-    "test-travis": "istanbul cover node_modules/.bin/_mocha --report lcovonly -- -R dot -t 200 test/*.js"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/chekulaevalexey/angular-inject-templates.git"
+    "url": "git://github.com/laxa1986/angular-inject-templates.git"
   },
   "keywords": [
     "gulpplugin",
     "file",
     "include",
     "replace",
+    "embed",
     "gulp",
-    "plugin"
+    "plugin",
+    "angular",
+    "templates"
   ],
   "author": {
     "name": "Alexey Chekulaev"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chekulaevalexey/angular-inject-templates/issues"
+    "url": "https://github.com/laxa1986/angular-inject-templates/issues"
   },
-  "homepage": "https://github.com/chekulaevalexey/angular-inject-templates",
+  "homepage": "https://github.com/laxa1986/angular-inject-templates",
   "devDependencies": {
   },
   "dependencies": {
@@ -43,29 +43,7 @@
     "Readme.md"
   ],
   "directories": {
-    "example": "example",
-    "test": "test"
   },
-  "gitHead": "95b8e1071f54cb27d57ce0ae5b5b788332cc4727",
-  "_id": "gulp-file-include@0.9.0",
-  "_shasum": "79d70e295244507f6a495fcb3fc5a591f7019b5b",
-  "_from": "gulp-file-include@>=0.9.0 <0.10.0",
-  "_npmVersion": "2.7.6",
-  "_nodeVersion": "1.7.1",
-  "_npmUser": {
-    "name": "coderhaoxin",
-    "email": "coderhaoxin@outlook.com"
-  },
-  "maintainers": [
-    {
-      "name": "coderhaoxin",
-      "email": "coderhaoxin@outlook.com"
-    }
-  ],
-  "dist": {
-    "shasum": "79d70e295244507f6a495fcb3fc5a591f7019b5b",
-    "tarball": "http://registry.npmjs.org/gulp-file-include/-/gulp-file-include-0.9.0.tgz"
-  },
-  "_resolved": "https://registry.npmjs.org/gulp-file-include/-/gulp-file-include-0.9.0.tgz",
-  "readme": "ERROR: No README data found!"
+  "_npmVersion": "2.7.4",
+  "_nodeVersion": "0.12.2"
 }

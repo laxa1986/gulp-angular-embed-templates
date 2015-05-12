@@ -9,13 +9,23 @@ var Minimize = require('minimize');
 // Constants
 const PLUGIN_NAME = 'angular-include-template';
 
+var debug = false;
+function log() {
+    if (debug) {
+        console.log.apply(console, arguments);
+    }
+}
+
 module.exports = function (options) {
     options = options || {};
     if (!options.minimize) {
         options.minimize = {};
     }
-    if (options.brakeOnErrors === undefined) {
-        options.brakeOnErrors = true;
+    if (options.skipErrors === undefined) {
+        options.skipErrors = false;
+    }
+    if (options.debug === undefined) {
+        debug = options.debug;
     }
 
     var minimizer = new Minimize(options.minimize);
@@ -43,7 +53,7 @@ module.exports = function (options) {
     function replace(filePath, cb) {
         var matches = templateUrlRegexp.exec(content);
 
-        console.log('matches: ' + matches);
+        log('matches: ' + matches);
 
         if (matches === null) {
             cb(CODE_EXIT);
@@ -53,30 +63,31 @@ module.exports = function (options) {
         var relativeTemplatePath = matches[1];
         var path = pathModule.join(filePath, relativeTemplatePath);
 
-        console.log('template path: ' + path);
+        log('template path: ' + path);
 
         fs.readFile(path, {encoding: 'utf8'}, function(err, templateContent) {
             if (err) {
                 var errMsg = 'Can\'t open file: ' + path + ', error: ' + err;
-                if (options.brakeOnErrors) {
+                if (options.skipErrors) {
+                    cb(FOUND_ERROR);
+                    gutil.log(PLUGIN_NAME, '[WARN]', gutil.colors.magenta(errMsg));
+                    return;
+                } else {
                     // TODO: check
                     throw new PluginError(PLUGIN_NAME, errMsg);
-                } else {
-                    gutil.log(PLUGIN_NAME, '[WARN]', gutil.colors.magenta(errMsg));
-                    cb(FOUND_ERROR);
-                    return;
                 }
             }
 
             minimizer.parse(templateContent, function (err, minifiedContent) {
                 if (err) {
                     var errMsg = 'error while minifying ' + path + '. Error from minimize plugin: ' + err;
-                    if (options.brakeOnErrors) {
-                        throw new PluginError(PLUGIN_NAME, errMsg);
-                    } else {
+                    if (options.skipErrors) {
                         gutil.log(PLUGIN_NAME, '[WARN]', gutil.colors.magenta(errMsg));
                         cb(FOUND_ERROR);
                         return;
+                    } else {
+                        // TODO: check
+                        throw new PluginError(PLUGIN_NAME, errMsg);
                     }
                 }
 
@@ -121,7 +132,7 @@ module.exports = function (options) {
         templateUrlRegexp = new RegExp(TEMPLATE_URL_PATTERN, 'g');
         var entrances = [];
 
-        console.log('file.path: ' + file.path);
+        log('file.path: ' + file.path);
 
         var base = pathModule.dirname(file.path);
         replace(base, replaceCallback);
