@@ -1,16 +1,16 @@
-# angular-inject-templates
+# gulp-angular-embed-templates
 gulp plugin to include the contents of angular templates inside directive's code
 
 Plugin searches for `templateUrl: {template url}` and replace it with `template: {minified template content}`. To archive this template first minified with [minimize](https://www.npmjs.com/package/minimize)
 
 Nearest neighbours are:
 
-*   gulp-angular-templates - good for single page applications, combine all templates in one module. *angular-inject-templates* is better for **multi page applications**, where different pages use different set of angular directives so combining all templates in one is not an option. For single page applications they are similar but *angular-inject-templates* doesn't forces you to change your code for using some additional module: just replace template reference with the template code.
-*   gulp-include-file - can be used for the same purpose (file include) with *minimize* plugin as transform functions. *angular-inject-templates* do all of this out of the box.
+*   gulp-angular-templates - good for single page applications, combine all templates in one module. *gulp-angular-embed-templates* is better for **multi page applications**, where different pages use different set of angular directives so combining all templates in one is not an option. For single page applications they are similar but *angular-inject-templates* doesn't forces you to change your code for using some additional module: just replace template reference with the template code.
+*   gulp-include-file - can be used for the same purpose (file include) with *minimize* plugin as transform functions. *gulp-angular-embed-templates* do all of this out of the box.
 
 ## Install
 
-    npm install --save-dev angular-inject-templates
+    npm install --save-dev gulp-angular-embed-templates
 
 ## Usage
 
@@ -48,18 +48,18 @@ Using this example gulpfile:
 
 ```javascript
 var gulp = require('gulp');
-var injectTemplates = require('angular-inject-templates');
+var embedTemplates = require('gulp-angular-embed-templates');
 
 gulp.task('js:build', function () {
     gulp.src('src/scripts/**/*.js')
-        .pipe(injectTemplates())
+        .pipe(embedTemplates())
         .pipe(gulp.dest('./dist'));
 });
 ```
 
 ## API
 
-### injectTemplates(options)
+### embedTemplates(options)
 
 #### options.minimize
 Type: `Object`

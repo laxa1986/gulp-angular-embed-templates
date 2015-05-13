@@ -1,5 +1,5 @@
 {
-  "name": "angular-inject-templates",
+  "name": "gulp-angular-embed-templates",
   "version": "0.1.2",
   "description": "gulp plugin to include the contents of angular templates inside directive's code",
   "main": "index.js",
@@ -8,17 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/laxa1986/angular-inject-templates.git"
+    "url": "git://github.com/laxa1986/gulp-angular-embed-templates.git"
   },
   "keywords": [
     "gulpplugin",
-    "file",
-    "include",
-    "replace",
-    "embed",
     "gulp",
     "plugin",
     "angular",
+    "embed",
+    "include",
     "templates"
   ],
   "author": {
@@ -26,9 +24,9 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/laxa1986/angular-inject-templates/issues"
+    "url": "https://github.com/laxa1986/gulp-angular-embed-templates/issues"
   },
-  "homepage": "https://github.com/laxa1986/angular-inject-templates",
+  "homepage": "https://github.com/laxa1986/gulp-angular-embed-templates",
   "devDependencies": {},
   "dependencies": {
     "through2": "^0.6.5",
