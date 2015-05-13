@@ -7,7 +7,7 @@ var PluginError = gutil.PluginError;
 var Minimize = require('minimize');
 
 // Constants
-const PLUGIN_NAME = 'angular-include-template';
+const PLUGIN_NAME = 'gulp-angular-embed-template';
 
 var debug = false;
 function log() {
@@ -67,28 +67,14 @@ module.exports = function (options) {
 
         fs.readFile(path, {encoding: 'utf8'}, function(err, templateContent) {
             if (err) {
-                var errMsg = 'Can\'t open file: ' + path + ', error: ' + err;
-                if (options.skipErrors) {
-                    cb(FOUND_ERROR);
-                    gutil.log(PLUGIN_NAME, '[WARN]', gutil.colors.magenta(errMsg));
-                    return;
-                } else {
-                    // TODO: check
-                    throw new PluginError(PLUGIN_NAME, errMsg);
-                }
+                cb(FOUND_ERROR, 'Can\'t read template file: "' + path + '". Error details: ' + err);
+                return;
             }
 
             minimizer.parse(templateContent, function (err, minifiedContent) {
                 if (err) {
-                    var errMsg = 'error while minifying ' + path + '. Error from minimize plugin: ' + err;
-                    if (options.skipErrors) {
-                        gutil.log(PLUGIN_NAME, '[WARN]', gutil.colors.magenta(errMsg));
-                        cb(FOUND_ERROR);
-                        return;
-                    } else {
-                        // TODO: check
-                        throw new PluginError(PLUGIN_NAME, errMsg);
-                    }
+                    cb(FOUND_ERROR, 'Error while minifying angular template "' + path + '". Error from "minimize" plugin: ' + err);
+                    return;
                 }
 
                 cb(FOUND_SUCCESS, {
@@ -128,6 +114,7 @@ module.exports = function (options) {
             throw new PluginError(PLUGIN_NAME, 'Streaming not supported. particular file: ' + file.path);
         }
 
+        var pipe = this;
         content = file.contents.toString('utf8');
         templateUrlRegexp = new RegExp(TEMPLATE_URL_PATTERN, 'g');
         var entrances = [];
@@ -137,24 +124,29 @@ module.exports = function (options) {
         var base = pathModule.dirname(file.path);
         replace(base, replaceCallback);
 
-        function replaceCallback(code, entrance) {
+        function replaceCallback(code, data) {
             if (code === FOUND_SUCCESS) {
-                entrances.push(entrance);
+                entrances.push(data);
                 replace(base, replaceCallback);
-                return;
             }
 
-            if (code === FOUND_ERROR) {
-                replace(base, replaceCallback);
-                return
+            else if (code === FOUND_ERROR) {
+                var msg = data;
+
+                if (options.skipErrors) {
+                    gutil.log(PLUGIN_NAME, '[WARN]', gutil.colors.magenta(msg));
+                    replace(base, replaceCallback);
+                } else {
+                    pipe.emit('error', new PluginError(PLUGIN_NAME, msg));
+                }
             }
 
-            /* if (code === CODE_EXIT) */
-            if (entrances.length) {
-                file.contents = joinParts(entrances);
+            else if (code === CODE_EXIT) {
+                if (entrances.length) {
+                    file.contents = joinParts(entrances);
+                }
+                cb(null, file);
             }
-
-            cb(null, file);
         }
     }
 
