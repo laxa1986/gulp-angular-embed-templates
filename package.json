@@ -19,9 +19,7 @@
     "include",
     "templates"
   ],
-  "author": {
-    "name": "Alexey Chekulaev <chekulaevalexey@gmail.com>"
-  },
+  "author": "Alexey Chekulaev <chekulaevalexey@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/laxa1986/gulp-angular-embed-templates/issues"
