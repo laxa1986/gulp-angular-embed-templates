@@ -24,8 +24,14 @@ module.exports = function (options) {
     if (options.skipErrors === undefined) {
         options.skipErrors = false;
     }
-    if (options.debug === undefined) {
-        debug = options.debug;
+    if (!options.jsEncoding) {
+        options.jsEncoding = 'utf-8';
+    }
+    if (!options.templateEncoding) {
+        options.templateEncoding = 'utf-8';
+    }
+    if (options.debug === true) {
+        debug = true;
     }
 
     var minimizer = new Minimize(options.minimize);
@@ -65,7 +71,7 @@ module.exports = function (options) {
 
         log('template path: ' + path);
 
-        fs.readFile(path, {encoding: 'utf8'}, function(err, templateContent) {
+        fs.readFile(path, {encoding: options.templateEncoding}, function(err, templateContent) {
             if (err) {
                 cb(FOUND_ERROR, 'Can\'t read template file: "' + path + '". Error details: ' + err);
                 return;
@@ -115,11 +121,11 @@ module.exports = function (options) {
         }
 
         var pipe = this;
-        content = file.contents.toString('utf8');
+        content = file.contents.toString(options.jsEncoding);
         templateUrlRegexp = new RegExp(TEMPLATE_URL_PATTERN, 'g');
         var entrances = [];
 
-        log('file.path: ' + file.path);
+        log('\nfile.path: ' + file.path);
 
         var base = pathModule.dirname(file.path);
         replace(base, replaceCallback);
