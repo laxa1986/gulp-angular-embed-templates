@@ -73,6 +73,18 @@ Default value: 'false'
 
 should plugin brake on errors (file not found, error in minification) or skip errors and go to next template
 
+#### options.jsEncoding
+Type: `String`
+Default value: 'utf-8'
+
+js code files encoding (angular directives)
+
+#### options.templateEncoding
+Type: `String`
+Default value: 'utf-8'
+
+angular template files encoding
+
 ## License
 This module is released under the MIT license.
 
