@@ -127,4 +127,18 @@ describe('gulp-angular-embed-templates', function () {
             done();
         });
     });
+
+    it('should ignore files bigger than the maxSize specified', function (done) {
+        var tplStats = fs.statSync('test/assets/hello-world-template.html');
+        var sut = embedTemplates({maxSize: tplStats.size - 1});
+        var entry = JSON.stringify({
+            templateUrl: 'test/assets/hello-world-template.html'
+        });
+        var fakeFile = new File({contents: new Buffer(entry)});
+        sut.write(fakeFile);
+        sut.once('data', function (file) {
+            assert.equal(file.contents.toString('utf8'), entry);
+            done();
+        });
+    });
 });

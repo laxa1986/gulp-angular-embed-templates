@@ -91,6 +91,12 @@ Default value: based on the path for the current file
 
 define the base path for the templates, useful when you are using absolute path
 
+#### options.maxSize
+Type: `Number` in bytes
+Default value: Null
+
+define the max size limit for the template be embeded
+
 ## License
 This module is released under the MIT license.
 
