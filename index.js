@@ -140,7 +140,11 @@ module.exports = function (options) {
                 var msg = data;
 
                 if (options.skipErrors) {
-                    gutil.log(PLUGIN_NAME, '[WARN]', gutil.colors.magenta(msg));
+                    gutil.log(
+                        PLUGIN_NAME, 
+                        gutil.colors.yellow('[Warning]'),
+                        gutil.colors.magenta(msg)
+                    );
                     replace(base, replaceCallback);
                 } else {
                     pipe.emit('error', new PluginError(PLUGIN_NAME, msg));
