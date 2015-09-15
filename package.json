@@ -26,10 +26,10 @@
   },
   "homepage": "https://github.com/laxa1986/gulp-angular-embed-templates",
   "dependencies": {
-    "through2": "^0.6.5",
     "gulp-util": "^3.0.4",
+    "js-string-escape": "^1.0.0",
     "minimize": "^1.4.1",
-    "js-string-escape": "^1.0.0"
+    "through2": "^2.0.0"
   },
   "devDependencies": {
     "mocha": "^2.0.1",
