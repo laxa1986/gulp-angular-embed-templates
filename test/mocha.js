@@ -113,4 +113,18 @@ describe('gulp-angular-embed-templates', function () {
             done();
         });
     });
+
+    it('should use basePath to find the templates if specified', function (done) {
+        var tplStats = fs.statSync('test/assets/hello-world-template.html');
+        var sut = embedTemplates({ basePath: 'test' });
+        var entry = JSON.stringify({
+            templateUrl: '/assets/hello-world-template.html'
+        });
+        var fakeFile = new File({contents: new Buffer(entry)});
+        sut.write(fakeFile);
+        sut.once('data', function (file) {
+            assert.equal(file.contents.toString('utf8'), '{template:\'<strong>Hello World!</strong>\'}');
+            done();
+        });
+    });
 });

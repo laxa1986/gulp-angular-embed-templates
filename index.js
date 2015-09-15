@@ -127,7 +127,7 @@ module.exports = function (options) {
 
         log('\nfile.path: ' + file.path);
 
-        var base = pathModule.dirname(file.path);
+        var base = options.basePath ? options.basePath : pathModule.dirname(file.path);
         replace(base, replaceCallback);
 
         function replaceCallback(code, data) {
