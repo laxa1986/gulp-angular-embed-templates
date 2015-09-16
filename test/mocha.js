@@ -28,7 +28,7 @@ describe('gulp-angular-embed-templates', function () {
             assert(file.isBuffer());
 
             // check the contents
-            assert.equal(file.contents.toString('utf8').replace(/\r\n/, '\n'),
+            assert.equal(file.contents.toString('utf8'),
                 'angular.module(\'test\').directive(\'helloWorld\', function () {\n' +
                 '    return {\n' +
                 '        restrict: \'E\',\n' +

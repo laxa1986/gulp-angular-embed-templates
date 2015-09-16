@@ -95,7 +95,7 @@ define the base path for the templates, useful when you are using absolute path
 Type: `Number`
 Default value: Null
 
-define the max size limit in bytes for the template be embeded
+define the max size limit in bytes for the template be embeded. Ignore templates which size exceed this limit
 
 ## License
 This module is released under the MIT license.

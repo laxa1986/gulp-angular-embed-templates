@@ -53,9 +53,11 @@ module.exports = function (options) {
     const TEMPLATE_END = Buffer('\'');
 
     /**
-     * replace one template url with minified template text
-     * @param {String} filePath
-     * @param {Function} cb
+     * Find next "templateUrl:", and try to replace url with content if template available, less then maximum size.
+     * And finally (in any case) call 'cb' function with proper code
+     *
+     * @param {String} filePath path to original .js file
+     * @param {Function} cb callback function to call when
      */
     function replace(filePath, cb) {
         var matches = templateUrlRegexp.exec(content);
@@ -72,13 +74,14 @@ module.exports = function (options) {
 
         log('template path: ' + path);
 
-        if(options.maxSize){
+        if (options.maxSize) {
             var fileStats = fs.statSync(path);
-            if(fileStats && fileStats.size > options.maxSize)
+            if (fileStats && fileStats.size > options.maxSize) {
                 return cb(FOUND_IGNORE, {
                     path: relativeTemplatePath,
                     size: fileStats.size
                 });
+            }
         }
 
         fs.readFile(path, {encoding: options.templateEncoding}, function(err, templateContent) {
@@ -166,8 +169,8 @@ module.exports = function (options) {
                     PLUGIN_NAME,
                     gutil.colors.yellow('[Template ignored]'),
                     gutil.colors.blue(data.path),
-                    'minimal size reached',
-                    gutil.colors.magenta(data.size+' bytes')
+                    'maximum size reached',
+                    gutil.colors.magenta(data.size + ' bytes')
                 );
                 replace(base, replaceCallback);
             }
