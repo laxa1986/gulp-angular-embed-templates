@@ -46,6 +46,7 @@ module.exports = function (options) {
 
     const FOUND_SUCCESS = {};
     const FOUND_ERROR = {};
+    const FOUND_IGNORE = {};
     const CODE_EXIT = {};
 
     const TEMPLATE_BEGIN = Buffer('template:\'');
@@ -70,6 +71,15 @@ module.exports = function (options) {
         var path = pathModule.join(filePath, relativeTemplatePath);
 
         log('template path: ' + path);
+
+        if(options.maxSize){
+            var fileStats = fs.statSync(path);
+            if(fileStats && fileStats.size > options.maxSize)
+                return cb(FOUND_IGNORE, {
+                    path: relativeTemplatePath,
+                    size: fileStats.size
+                });
+        }
 
         fs.readFile(path, {encoding: options.templateEncoding}, function(err, templateContent) {
             if (err) {
@@ -127,7 +137,7 @@ module.exports = function (options) {
 
         log('\nfile.path: ' + file.path);
 
-        var base = pathModule.dirname(file.path);
+        var base = options.basePath ? options.basePath : pathModule.dirname(file.path);
         replace(base, replaceCallback);
 
         function replaceCallback(code, data) {
@@ -140,11 +150,26 @@ module.exports = function (options) {
                 var msg = data;
 
                 if (options.skipErrors) {
-                    gutil.log(PLUGIN_NAME, '[WARN]', gutil.colors.magenta(msg));
+                    gutil.log(
+                        PLUGIN_NAME, 
+                        gutil.colors.yellow('[Warning]'),
+                        gutil.colors.magenta(msg)
+                    );
                     replace(base, replaceCallback);
                 } else {
                     pipe.emit('error', new PluginError(PLUGIN_NAME, msg));
                 }
+            }
+
+            else if (code === FOUND_IGNORE) {
+                gutil.log(
+                    PLUGIN_NAME,
+                    gutil.colors.yellow('[Template ignored]'),
+                    gutil.colors.blue(data.path),
+                    'minimal size reached',
+                    gutil.colors.magenta(data.size+' bytes')
+                );
+                replace(base, replaceCallback);
             }
 
             else if (code === CODE_EXIT) {

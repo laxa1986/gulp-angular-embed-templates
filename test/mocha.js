@@ -28,12 +28,12 @@ describe('gulp-angular-embed-templates', function () {
             assert(file.isBuffer());
 
             // check the contents
-            assert.equal(file.contents.toString('utf8'),
-                'angular.module(\'test\').directive(\'helloWorld\', function () {\r\n' +
-                '    return {\r\n' +
-                '        restrict: \'E\',\r\n' +
-                '        template:\'<strong>Hello World!</strong>\'\r\n' +
-                '    };\r\n' +
+            assert.equal(file.contents.toString('utf8').replace(/\r\n/, '\n'),
+                'angular.module(\'test\').directive(\'helloWorld\', function () {\n' +
+                '    return {\n' +
+                '        restrict: \'E\',\n' +
+                '        template:\'<strong>Hello World!</strong>\'\n' +
+                '    };\n' +
                 '});'
             );
             done();
@@ -110,6 +110,34 @@ describe('gulp-angular-embed-templates', function () {
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), '{template:\'<strong>Hello World!</strong>\',"l2":{"templateUrl":"test/assets/hello-world-template2.html"},"l3":{template:\'<strong>Hello World!</strong>\'}}');
+            done();
+        });
+    });
+
+    it('should use basePath to find the templates if specified', function (done) {
+        var tplStats = fs.statSync('test/assets/hello-world-template.html');
+        var sut = embedTemplates({ basePath: 'test' });
+        var entry = JSON.stringify({
+            templateUrl: '/assets/hello-world-template.html'
+        });
+        var fakeFile = new File({contents: new Buffer(entry)});
+        sut.write(fakeFile);
+        sut.once('data', function (file) {
+            assert.equal(file.contents.toString('utf8'), '{template:\'<strong>Hello World!</strong>\'}');
+            done();
+        });
+    });
+
+    it('should ignore files bigger than the maxSize specified', function (done) {
+        var tplStats = fs.statSync('test/assets/hello-world-template.html');
+        var sut = embedTemplates({maxSize: tplStats.size - 1});
+        var entry = JSON.stringify({
+            templateUrl: 'test/assets/hello-world-template.html'
+        });
+        var fakeFile = new File({contents: new Buffer(entry)});
+        sut.write(fakeFile);
+        sut.once('data', function (file) {
+            assert.equal(file.contents.toString('utf8'), entry);
             done();
         });
     });
