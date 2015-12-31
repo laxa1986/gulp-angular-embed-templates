@@ -38,7 +38,7 @@ module.exports = function (options) {
 
     // regexp uses 'g' flag to be able to match several occurrences
     // so it should be reset for each file
-    const TEMPLATE_URL_PATTERN = '[\'"`]?templateUrl[\'"`]?[\\s]*:[\\s]*[\'"`]([^\'"`]+)[\'"`]';
+    const TEMPLATE_URL_PATTERN = '[\'"]?templateUrl[\'"]?[\\s]*:[\\s]*[\'"`]([^\'"`]+)[\'"`]';
 
     // variables which reset for each file
     var content;
