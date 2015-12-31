@@ -56,6 +56,7 @@ gulp.task('js:build', function () {
         .pipe(gulp.dest('./dist'));
 });
 ```
+**Note**: call _embedTemplates_ before source maps initialization.
 
 ## API
 
