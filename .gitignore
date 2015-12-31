@@ -1,3 +1,5 @@
 Idea/*
+Idea Project/*
+*.idea
 node_modules
 npm-debug.log

@@ -10,10 +10,21 @@ var File = require('gulp-util').File;
 //var fixtures = function (glob) { return path.join(__dirname, 'fixtures', glob); };
 
 describe('gulp-angular-embed-templates', function () {
-    it('should embed template content whenever specified templateUrl', function (done) {
-        // Create a 'gulp-angular-embed-templates' plugin stream
-        var sut = embedTemplates();
+    var sut;
 
+    function buildFakeFile(templateName) {
+        var entry = JSON.stringify({
+            templateUrl: 'test/assets/'+templateName
+        });
+        return new File({contents: new Buffer(entry)});
+    }
+
+    beforeEach(function() {
+        // Create a 'gulp-angular-embed-templates' plugin stream
+        sut = embedTemplates();
+    });
+
+    it('should embed template content whenever specified templateUrl', function (done) {
         // create the fake file
         var fakeFile = new File({
             contents: new Buffer(fs.readFileSync('test/assets/hello-world-directive.js'))
@@ -41,7 +52,6 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with single quoted template paths', function (done) {
-        var sut = embedTemplates();
         var fakeFile = new File({contents: new Buffer('templateUrl: \'test/assets/hello-world-template.html\'')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
@@ -51,7 +61,6 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with double quoted template paths', function (done) {
-        var sut = embedTemplates();
         var fakeFile = new File({contents: new Buffer('templateUrl: "test/assets/hello-world-template.html"')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
@@ -61,7 +70,6 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with single quoted templateUrl key', function (done) {
-        var sut = embedTemplates();
         var fakeFile = new File({contents: new Buffer('\'templateUrl\': \'test/assets/hello-world-template.html\'')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
@@ -71,7 +79,6 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with double quoted templateUrl key', function (done) {
-        var sut = embedTemplates();
         var fakeFile = new File({contents: new Buffer('"templateUrl": \'test/assets/hello-world-template.html\'')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
@@ -81,7 +88,6 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with templateUrl {SPACES} : {SPACES} {url} ', function (done) {
-        var sut = embedTemplates();
         var fakeFile = new File({contents: new Buffer('"templateUrl" \t\r\n:\r\n\t  \'test/assets/hello-world-template.html\'')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
@@ -91,7 +97,6 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with templateUrl {SPACES} : {SPACES} {url} ', function (done) {
-        var sut = embedTemplates();
         var fakeFile = new File({contents: new Buffer('"templateUrl" \t\r\n:\r\n\t  \'test/assets/hello-world-template.html\'')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
@@ -101,7 +106,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should skip errors if particular flag specified', function (done) {
-        var sut = embedTemplates({skipErrors: true});
+        sut = embedTemplates({skipErrors: true});
         var fakeFile = new File({contents: new Buffer(JSON.stringify({
             templateUrl: 'test/assets/hello-world-template.html',
             l2: {templateUrl: 'test/assets/hello-world-template2.html'},
@@ -115,8 +120,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should use basePath to find the templates if specified', function (done) {
-        var tplStats = fs.statSync('test/assets/hello-world-template.html');
-        var sut = embedTemplates({ basePath: 'test' });
+        sut = embedTemplates({ basePath: 'test' });
         var entry = JSON.stringify({
             templateUrl: '/assets/hello-world-template.html'
         });
@@ -130,14 +134,21 @@ describe('gulp-angular-embed-templates', function () {
 
     it('should ignore files bigger than the maxSize specified', function (done) {
         var tplStats = fs.statSync('test/assets/hello-world-template.html');
-        var sut = embedTemplates({maxSize: tplStats.size - 1});
-        var entry = JSON.stringify({
-            templateUrl: 'test/assets/hello-world-template.html'
-        });
-        var fakeFile = new File({contents: new Buffer(entry)});
+        sut = embedTemplates({maxSize: tplStats.size - 1});
+        var fakeFile = buildFakeFile('hello-world-template.html');
+        var contentBefore = fakeFile.contents.toString('utf8');
         sut.write(fakeFile);
         sut.once('data', function (file) {
-            assert.equal(file.contents.toString('utf8'), entry);
+            assert.equal(file.contents.toString('utf8'), contentBefore);
+            done();
+        });
+    });
+
+    it('should embed template with quotes properly', function(done) {
+        var fakeFile = buildFakeFile('hard-template.html');
+        sut.write(fakeFile);
+        sut.once('data', function (file) {
+            assert.equal(file.contents.toString('utf8'), '{template:\'<form class=login id=\\\"home form\\\" x=c>My name is\\\'{{value}}\\\'</form>\'}');
             done();
         });
     });
