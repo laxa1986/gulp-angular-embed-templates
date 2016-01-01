@@ -1,7 +1,7 @@
 1.0.0 / 2016-01-01
 ==================
   * Escape only single quotes. Before: `template:'\'\"'`, Now: `template:'\'"'`
-  * Checked support of Angular2.0 templates like `\<a \[router-link\]="\['/search'\]"\>Search\</a\>`
+  * Checked support of Angular2.0 templates like `<a [router-link]="['/search']">Search</a>`
 
 0.2.1 / 2015-12-31
 ==================
