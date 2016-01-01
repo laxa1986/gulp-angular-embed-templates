@@ -1,7 +1,6 @@
 var through = require('through2');
 var gutil = require('gulp-util');
 var pathModule = require('path');
-var jsStringEscape = require('js-string-escape');
 var fs = require('fs');
 var PluginError = gutil.PluginError;
 var Minimize = require('minimize');
@@ -14,6 +13,20 @@ function log() {
     if (debug) {
         console.log.apply(console, arguments);
     }
+}
+
+function escapeSingleQuotes(string) {
+    const ESCAPING = {
+        '\'': '\\\'',
+        '\\': '\\\\',
+        '\n': '\\n',
+        '\r': '\\r',
+        '\u2028': '\\u2028',
+        '\u2029': '\\u2029'
+    };
+    return string.replace(/['\\\n\r\u2028\u2029]/g, function (character) {
+        return ESCAPING[character];
+    });
 }
 
 module.exports = function (options) {
@@ -113,7 +126,7 @@ module.exports = function (options) {
 
             parts.push(Buffer(content.substring(index, matches.index)));
             parts.push(TEMPLATE_BEGIN);
-            parts.push(Buffer(jsStringEscape(entrance.template)));
+            parts.push(Buffer(escapeSingleQuotes(entrance.template)));
             parts.push(TEMPLATE_END);
 
             index = matches.index + matches[0].length;

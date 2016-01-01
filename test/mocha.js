@@ -1,8 +1,5 @@
 var embedTemplates = require('../');
-//var gulp = require('gulp');
-//var should = require('should');
 var assert = require('assert');
-//var streamAssert = require('stream-assert');
 require('mocha');
 var fs = require('fs');
 var File = require('gulp-util').File;
@@ -19,6 +16,12 @@ describe('gulp-angular-embed-templates', function () {
         return new File({contents: new Buffer(entry)});
     }
 
+    function readFile(path) {
+        return new File({
+            contents: new Buffer(fs.readFileSync(path))
+        });
+    }
+
     beforeEach(function() {
         // Create a 'gulp-angular-embed-templates' plugin stream
         sut = embedTemplates();
@@ -26,12 +29,10 @@ describe('gulp-angular-embed-templates', function () {
 
     it('should embed template content whenever specified templateUrl', function (done) {
         // create the fake file
-        var fakeFile = new File({
-            contents: new Buffer(fs.readFileSync('test/assets/hello-world-directive.js'))
-        });
+        var directiveFile = readFile('test/assets/hello-world-directive.js');
 
         // write the fake file to it
-        sut.write(fakeFile);
+        sut.write(directiveFile);
 
         // wait for the file to come back out
         sut.once('data', function (file) {
@@ -148,7 +149,26 @@ describe('gulp-angular-embed-templates', function () {
         var fakeFile = buildFakeFile('hard-template.html');
         sut.write(fakeFile);
         sut.once('data', function (file) {
-            assert.equal(file.contents.toString('utf8'), '{template:\'<form class=login id=\\\"home form\\\" x=c>My name is\\\'{{value}}\\\'</form>\'}');
+            assert.equal(file.contents.toString('utf8'), '{template:\'<form class=login id="home form" x=c>My name is\\\'{{value}}\\\'</form>\'}');
+            done();
+        });
+    });
+
+    it('should embed Angular 2.0 templates with <a [router-link]="[\'/search\']">Search</a>', function (done) {
+        // create the fake file
+        var directiveFile = readFile('test/assets/angular2-component.js');
+        var embeddedFile = readFile('test/assets/angular2-embedded.js');
+
+        // write the fake file to it
+        sut.write(directiveFile);
+
+        // wait for the file to come back out
+        sut.once('data', function (file) {
+            // make sure it came out the same way it went in
+            assert(file.isBuffer());
+
+            // check the contents
+            assert.equal(file.contents.toString('utf8'), embeddedFile.contents.toString('utf8'));
             done();
         });
     });
