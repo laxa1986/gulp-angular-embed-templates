@@ -1,3 +1,7 @@
+1.1.0 / 2016-01-09
+==================
+  * Do not change html attributes case (previously ngIf changed to ngif, which causes errors in Angular2.0 beta)
+
 1.0.0 / 2016-01-01
 ==================
   * Escape only single quotes. Before: `template:'\'\"'`, Now: `template:'\'"'`

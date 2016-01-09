@@ -8,24 +8,38 @@ Nearest neighbours are:
 *   gulp-angular-templates - good for single page applications, combine all templates in one module. *gulp-angular-embed-templates* is better for **multi page applications**, where different pages use different set of angular directives so combining all templates in one is not an option. For single page applications they are similar but *angular-inject-templates* doesn't forces you to change your code for using some additional module: just replace template reference with the template code.
 *   gulp-include-file - can be used for the same purpose (file include) with *minimize* plugin as transform functions. *gulp-angular-embed-templates* do all of this out of the box.
 
+## Versions / Release Notes
+
+[CHANGELOG on GitHub](https://github.com/laxa1986/gulp-angular-embed-templates/blob/master/CHANGELOG.md)
+
 ## Install
 
     npm install --save-dev gulp-angular-embed-templates
 
 ## Usage
 
-Given the following javascript file:
+Given the following file structure
+
+```javascript
+src
++-hello-world
+  |-hello-world-directive.js
+  +-hello-world-template.html
+```
+
+`hello-world-directive.js`:
 
 ```javascript
 angular.module('test').directive('helloWorld', function () {
     return {
         restrict: 'E',
+        // relative path to template
         templateUrl: 'hello-world-template.html'
     };
 });
 ```
 
-And the following `hello-world-template.html` in the same directory (actually it can be anywhere):
+`hello-world-template.html`:
 
 ```html
 <strong>
@@ -33,7 +47,7 @@ And the following `hello-world-template.html` in the same directory (actually it
 </strong>
 ```
 
-This module will generate the following file:
+*gulp-angular-embed-templates* will generate the following file:
 
 ```javascript
 angular.module('test').directive('helloWorld', function () {
@@ -64,7 +78,7 @@ gulp.task('js:build', function () {
 
 #### options.minimize
 Type: `Object`
-Default value: '{}'
+Default value: {parser: customParser}
 
 settings to pass in minimize plugin. Please see all settings on [minimize official page](https://www.npmjs.com/package/minimize)
 
@@ -88,9 +102,8 @@ angular template files encoding
 
 #### options.basePath
 Type: `String`
-Default value: based on the path for the current file
-
-define the base path for the templates, useful when you are using absolute path
+By default plugin use path specified in 'templateUrl' as a relative path to corresponding '.js' file (file with 'templateUrl')
+This option allow to specify another basePath to search templates as 'basePath'+'templateUrl'
 
 #### options.maxSize
 Type: `Number`

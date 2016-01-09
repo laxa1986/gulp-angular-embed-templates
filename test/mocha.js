@@ -9,6 +9,11 @@ var File = require('gulp-util').File;
 describe('gulp-angular-embed-templates', function () {
     var sut;
 
+    /**
+     * Build fake file with content '{templateUrl:"test/assets/{templateName}"}'
+     * @param {String} templateName
+     * @returns {*} File object
+     */
     function buildFakeFile(templateName) {
         var entry = JSON.stringify({
             templateUrl: 'test/assets/'+templateName
@@ -16,9 +21,34 @@ describe('gulp-angular-embed-templates', function () {
         return new File({contents: new Buffer(entry)});
     }
 
+    /**
+     * synchronously read file
+     *
+     * @param {String} path path ot file
+     * @returns {*} File object
+     */
     function readFile(path) {
         return new File({
             contents: new Buffer(fs.readFileSync(path))
+        });
+    }
+
+    /**
+     * test that after embedding template in `originalFile` it content equals to `expectEmbedFile`
+     * @param {String} originalFile original file path
+     * @param {String} expectEmbedFile expected file path
+     * @param {Function} done mocha 'done' handler
+     */
+    function testEmbed(originalFile, expectEmbedFile, done) {
+        var directiveFile = readFile(originalFile);
+        var embeddedFile = readFile(expectEmbedFile);
+
+        sut.write(directiveFile);
+
+        sut.once('data', function (file) {
+            assert(file.isBuffer());
+            assert.equal(file.contents.toString('utf8'), embeddedFile.contents.toString('utf8'));
+            done();
         });
     }
 
@@ -97,7 +127,7 @@ describe('gulp-angular-embed-templates', function () {
         });
     });
 
-    it('should dial with templateUrl {SPACES} : {SPACES} {url} ', function (done) {
+    it('should dial with templateUrl {SPACES} : {SPACES} {url}', function (done) {
         var fakeFile = new File({contents: new Buffer('"templateUrl" \t\r\n:\r\n\t  \'test/assets/hello-world-template.html\'')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
@@ -155,21 +185,10 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should embed Angular 2.0 templates with <a [router-link]="[\'/search\']">Search</a>', function (done) {
-        // create the fake file
-        var directiveFile = readFile('test/assets/angular2-component.js');
-        var embeddedFile = readFile('test/assets/angular2-embedded.js');
+        testEmbed('test/assets/angular2-component.js', 'test/assets/angular2-embedded.js', done);
+    });
 
-        // write the fake file to it
-        sut.write(directiveFile);
-
-        // wait for the file to come back out
-        sut.once('data', function (file) {
-            // make sure it came out the same way it went in
-            assert(file.isBuffer());
-
-            // check the contents
-            assert.equal(file.contents.toString('utf8'), embeddedFile.contents.toString('utf8'));
-            done();
-        });
+    it('should not change attributes case (for Angular2.0 beta)', function (done) {
+        testEmbed('test/assets/angular2-ngIf-component.js', 'test/assets/angular2-ngIf-embedded.js', done);
     });
 });

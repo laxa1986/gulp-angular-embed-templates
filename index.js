@@ -4,6 +4,7 @@ var pathModule = require('path');
 var fs = require('fs');
 var PluginError = gutil.PluginError;
 var Minimize = require('minimize');
+var html = require('htmlparser2');
 
 // Constants
 const PLUGIN_NAME = 'gulp-angular-embed-template';
@@ -48,6 +49,11 @@ module.exports = function (options) {
     }
 
     var minimizer = new Minimize(options.minimize);
+    if (!options.minimize.parser) {
+        minimizer.htmlparser = new html.Parser(
+            new html.DomHandler(minimizer.emits('read')), {lowerCaseAttributeNames:false}
+        );
+    }
 
     // regexp uses 'g' flag to be able to match several occurrences
     // so it should be reset for each file
