@@ -10,18 +10,6 @@ describe('gulp-angular-embed-templates', function () {
     var sut;
 
     /**
-     * Build fake file with content '{templateUrl:"test/assets/{templateName}"}'
-     * @param {String} templateName
-     * @returns {*} File object
-     */
-    function buildFakeFile(templateName) {
-        var entry = JSON.stringify({
-            templateUrl: 'test/assets/'+templateName
-        });
-        return new File({contents: new Buffer(entry)});
-    }
-
-    /**
      * synchronously read file
      *
      * @param {String} path path ot file
@@ -57,33 +45,8 @@ describe('gulp-angular-embed-templates', function () {
         sut = embedTemplates();
     });
 
-    it('should embed template content whenever specified templateUrl', function (done) {
-        // create the fake file
-        var directiveFile = readFile('test/assets/hello-world-directive.js');
-
-        // write the fake file to it
-        sut.write(directiveFile);
-
-        // wait for the file to come back out
-        sut.once('data', function (file) {
-            // make sure it came out the same way it went in
-            assert(file.isBuffer());
-
-            // check the contents
-            assert.equal(file.contents.toString('utf8'),
-                'angular.module(\'test\').directive(\'helloWorld\', function () {\n' +
-                '    return {\n' +
-                '        restrict: \'E\',\n' +
-                '        template:\'<strong>Hello World!</strong>\'\n' +
-                '    };\n' +
-                '});'
-            );
-            done();
-        });
-    });
-
     it('should dial with single quoted template paths', function (done) {
-        var fakeFile = new File({contents: new Buffer('templateUrl: \'test/assets/hello-world-template.html\'')});
+        var fakeFile = new File({contents: new Buffer('templateUrl: \'test/cases/hello-world/hello-world-template.html\'')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -92,7 +55,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with double quoted template paths', function (done) {
-        var fakeFile = new File({contents: new Buffer('templateUrl: "test/assets/hello-world-template.html"')});
+        var fakeFile = new File({contents: new Buffer('templateUrl: "test/cases/hello-world/hello-world-template.html"')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -101,7 +64,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with new quotes ` in template paths', function (done) {
-        var fakeFile = new File({contents: new Buffer('templateUrl: `test/assets/hello-world-template.html`')});
+        var fakeFile = new File({contents: new Buffer('templateUrl: `test/cases/hello-world/hello-world-template.html`')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -110,7 +73,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with single quoted templateUrl key', function (done) {
-        var fakeFile = new File({contents: new Buffer('\'templateUrl\': \'test/assets/hello-world-template.html\'')});
+        var fakeFile = new File({contents: new Buffer('\'templateUrl\': \'test/cases/hello-world/hello-world-template.html\'')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -119,7 +82,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with double quoted templateUrl key', function (done) {
-        var fakeFile = new File({contents: new Buffer('"templateUrl": \'test/assets/hello-world-template.html\'')});
+        var fakeFile = new File({contents: new Buffer('"templateUrl": \'test/cases/hello-world/hello-world-template.html\'')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -128,7 +91,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with templateUrl {SPACES} : {SPACES} {url}', function (done) {
-        var fakeFile = new File({contents: new Buffer('"templateUrl" \t\r\n:\r\n\t  \'test/assets/hello-world-template.html\'')});
+        var fakeFile = new File({contents: new Buffer('"templateUrl" \t\r\n:\r\n\t  \'test/cases/hello-world/hello-world-template.html\'')});
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -139,9 +102,9 @@ describe('gulp-angular-embed-templates', function () {
     it('should skip errors if particular flag specified', function (done) {
         sut = embedTemplates({skipErrors: true});
         var fakeFile = new File({contents: new Buffer(JSON.stringify({
-            templateUrl: 'test/assets/hello-world-template.html',
+            templateUrl: 'test/cases/hello-world/hello-world-template.html',
             l2: {templateUrl: 'test/assets/hello-world-template2.html'},
-            l3: {templateUrl: 'test/assets/hello-world-template.html'}
+            l3: {templateUrl: 'test/cases/hello-world/hello-world-template.html'}
         }))});
         sut.write(fakeFile);
         sut.once('data', function (file) {
@@ -153,7 +116,7 @@ describe('gulp-angular-embed-templates', function () {
     it('should use basePath to find the templates if specified', function (done) {
         sut = embedTemplates({ basePath: 'test' });
         var entry = JSON.stringify({
-            templateUrl: '/assets/hello-world-template.html'
+            templateUrl: '/cases/hello-world/hello-world-template.html'
         });
         var fakeFile = new File({contents: new Buffer(entry)});
         sut.write(fakeFile);
@@ -164,9 +127,12 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should ignore files bigger than the maxSize specified', function (done) {
-        var tplStats = fs.statSync('test/assets/hello-world-template.html');
+        var tplStats = fs.statSync('test/cases/hello-world/hello-world-template.html');
         sut = embedTemplates({maxSize: tplStats.size - 1});
-        var fakeFile = buildFakeFile('hello-world-template.html');
+        var entry = JSON.stringify({
+            templateUrl: 'test/cases/hello-world/hello-world-template.html'
+        });
+        var fakeFile = new File({contents: new Buffer(entry)});
         var contentBefore = fakeFile.contents.toString('utf8');
         sut.write(fakeFile);
         sut.once('data', function (file) {
@@ -176,19 +142,27 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should embed template with quotes properly', function(done) {
-        var fakeFile = buildFakeFile('hard-template.html');
-        sut.write(fakeFile);
-        sut.once('data', function (file) {
-            assert.equal(file.contents.toString('utf8'), '{template:\'<form class=login id="home form" x=c>My name is\\\'{{value}}\\\'</form>\'}');
-            done();
-        });
+        testEmbed(
+            'test/cases/hard-attributes/hard-attributes-directive.js',
+            'test/cases/hard-attributes/hard-attributes-embedded.js', done
+        );
+    });
+
+    it('should embed hello-world template', function (done) {
+        testEmbed(
+            'test/cases/hello-world/hello-world-directive.js',
+            'test/cases/hello-world/hello-world-embedded.js', done);
     });
 
     it('should embed Angular 2.0 templates with <a [router-link]="[\'/search\']">Search</a>', function (done) {
-        testEmbed('test/assets/angular2-component.js', 'test/assets/angular2-embedded.js', done);
+        testEmbed(
+            'test/cases/angular2-typescript/angular2-component.ts',
+            'test/cases/angular2-typescript/angular2-embedded.ts', done);
     });
 
     it('should not change attributes case (for Angular2.0 beta)', function (done) {
-        testEmbed('test/assets/angular2-ngIf-component.js', 'test/assets/angular2-ngIf-embedded.js', done);
+        testEmbed(
+            'test/cases/angular2-ngIf/angular2-ngIf-component.js',
+            'test/cases/angular2-ngIf/angular2-ngIf-embedded.js', done);
     });
 });

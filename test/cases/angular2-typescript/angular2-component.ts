@@ -12,7 +12,7 @@ import { Artist } from '../components/artist/artist';
 
 @View({
     directives: [RouterLink, RouterOutlet],
-    templateUrl: `test/assets/angular2-template.html`
+    templateUrl: `test/cases/angular2-typescript/angular2-template.html`
 })
 
 @RouteConfig([
