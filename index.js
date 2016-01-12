@@ -9,10 +9,17 @@ var html = require('htmlparser2');
 // Constants
 const PLUGIN_NAME = 'gulp-angular-embed-template';
 
+const TEMPLATE_BEGIN = Buffer('template:\'');
+const TEMPLATE_END = Buffer('\'');
+
+// regexp uses 'g' flag to be able to match several occurrences
+// so it should be reset for each file
+const TEMPLATE_URL_PATTERN = '[\'"]?templateUrl[\'"]?[\\s]*:[\\s]*[\'"`]([^\'"`]+)[\'"`]';
+
 var debug = false;
 function log() {
     if (debug) {
-        console.log.apply(console, arguments);
+        console.log(console, arguments);
     }
 }
 
@@ -28,6 +35,30 @@ function escapeSingleQuotes(string) {
     return string.replace(/['\\\n\r\u2028\u2029]/g, function (character) {
         return ESCAPING[character];
     });
+}
+
+/**
+ * join parts [before] ['template':] [template] [after]
+ * @param {String} fileContent
+ * @param {Array} entrances
+ * @return Buffer
+ */
+function joinParts(fileContent, entrances) {
+    var parts = [];
+    var index = 0;
+    for (var i=0; i<entrances.length; i++) {
+        var entrance = entrances[i];
+        var matches = entrance.regexpMatch;
+
+        parts.push(Buffer(fileContent.substring(index, matches.index)));
+        parts.push(TEMPLATE_BEGIN);
+        parts.push(Buffer(escapeSingleQuotes(entrance.template)));
+        parts.push(TEMPLATE_END);
+
+        index = matches.index + matches[0].length;
+    }
+    parts.push(Buffer(fileContent.substr(index)));
+    return Buffer.concat(parts);
 }
 
 module.exports = function (options) {
@@ -55,92 +86,115 @@ module.exports = function (options) {
         );
     }
 
-    // regexp uses 'g' flag to be able to match several occurrences
-    // so it should be reset for each file
-    const TEMPLATE_URL_PATTERN = '[\'"]?templateUrl[\'"]?[\\s]*:[\\s]*[\'"`]([^\'"`]+)[\'"`]';
+    var onError = options.skipErrors ?
+        function (msg) {
+            gutil.log(
+                PLUGIN_NAME,
+                gutil.colors.yellow('[Warning]'),
+                gutil.colors.magenta(msg)
+            );
+            replaceNext();
+        } :
+        function (msg) {
+            filePipe.emit('error', new PluginError(PLUGIN_NAME, msg));
+        };
 
     // variables which reset for each file
-    var content;
-    var templateUrlRegexp;
 
-    const FOUND_SUCCESS = {};
-    const FOUND_ERROR = {};
-    const FOUND_IGNORE = {};
-    const CODE_EXIT = {};
+    /**
+     * @type {String} path to original .js file
+     */
+    var filePath;
 
-    const TEMPLATE_BEGIN = Buffer('template:\'');
-    const TEMPLATE_END = Buffer('\'');
+    /**
+     * @type {String} source file (directive/component) content
+     */
+    var fileContent;
+
+    /**
+     * @type {RegExp} we create a regexp each time with 'g' flag to hold current position
+     * and search second time from previous position + 1
+     */
+    var fileRegexp;
+
+    /**
+     * @type {Array} parts of source file with templateUrl replaced by template body
+     */
+    var fileEntrances;
+
+    /**
+     * reference to current gulp steam to emit events
+     */
+    var filePipe;
+
+    /**
+     * @type {Function}
+     */
+    var fileCallback;
 
     /**
      * Find next "templateUrl:", and try to replace url with content if template available, less then maximum size.
-     * And finally (in any case) call 'cb' function with proper code
-     *
-     * @param {String} filePath path to original .js file
-     * @param {Function} cb callback function to call when
+     * This is recursive function: it call itself until one of two condition happens:
+     * - error happened (error emitted in pipe and stop recursive calls)
+     * - no 'templateUrl' left (call 'fileCallback' and stop recursive calls)
      */
-    function replace(filePath, cb) {
-        var matches = templateUrlRegexp.exec(content);
+    function replaceNext() {
+        var matches = fileRegexp.exec(fileContent);
 
-        log('matches: ' + matches);
+        log('matches: %s', matches);
 
         if (matches === null) {
-            cb(CODE_EXIT);
+            fileCallback();
             return;
         }
 
         var relativeTemplatePath = matches[1];
-        var path = pathModule.join(filePath, relativeTemplatePath);
+        var templatePath = pathModule.join(filePath, relativeTemplatePath);
 
-        log('template path: ' + path);
+        log('template path: %s', templatePath);
 
         if (options.maxSize) {
-            var fileStats = fs.statSync(path);
+            var fileStats = fs.statSync(templatePath);
             if (fileStats && fileStats.size > options.maxSize) {
-                return cb(FOUND_IGNORE, {
-                    path: relativeTemplatePath,
-                    size: fileStats.size
-                });
+                gutil.log(
+                    PLUGIN_NAME,
+                    gutil.colors.yellow('[Template ignored]'),
+                    gutil.colors.blue(relativeTemplatePath),
+                    'maximum size reached',
+                    gutil.colors.magenta(fileStats + ' bytes')
+                );
+                replaceNext();
+                return;
             }
         }
 
-        fs.readFile(path, {encoding: options.templateEncoding}, function(err, templateContent) {
+        fs.readFile(templatePath, {encoding: options.templateEncoding}, function(err, templateContent) {
             if (err) {
-                cb(FOUND_ERROR, 'Can\'t read template file: "' + path + '". Error details: ' + err);
+                onError('Can\'t read template file: "' + templatePath + '". Error details: ' + err);
                 return;
             }
 
             minimizer.parse(templateContent, function (err, minifiedContent) {
                 if (err) {
-                    cb(FOUND_ERROR, 'Error while minifying angular template "' + path + '". Error from "minimize" plugin: ' + err);
+                    onError('Error while minifying angular template "' + templatePath + '". Error from "minimize" plugin: ' + err);
                     return;
                 }
 
-                cb(FOUND_SUCCESS, {
+                fileEntrances.push({
                     regexpMatch : matches,
                     template: minifiedContent
                 });
+                replaceNext();
             });
         });
     }
 
-    function joinParts(entrances) {
-        var parts = [];
-        var index = 0;
-        for (var i=0; i<entrances.length; i++) {
-            var entrance = entrances[i];
-            var matches = entrance.regexpMatch;
-
-            parts.push(Buffer(content.substring(index, matches.index)));
-            parts.push(TEMPLATE_BEGIN);
-            parts.push(Buffer(escapeSingleQuotes(entrance.template)));
-            parts.push(TEMPLATE_END);
-
-            index = matches.index + matches[0].length;
-        }
-        parts.push(Buffer(content.substr(index)));
-        return Buffer.concat(parts);
-    }
-
+    /**
+     * This function is 'through' callback, so it has predefined arguments
+     * @param {File} file file to analyse
+     * @param {String} enc encoding (unused)
+     * @param {Function} cb callback
+     */
     function transform(file, enc, cb) {
         // ignore empty files
         if (file.isNull()) {
@@ -152,55 +206,21 @@ module.exports = function (options) {
             throw new PluginError(PLUGIN_NAME, 'Streaming not supported. particular file: ' + file.path);
         }
 
-        var pipe = this;
-        content = file.contents.toString(options.jsEncoding);
-        templateUrlRegexp = new RegExp(TEMPLATE_URL_PATTERN, 'g');
-        var entrances = [];
+        log('\nfile.path: %', file.path);
 
-        log('\nfile.path: ' + file.path);
-
-        var base = options.basePath ? options.basePath : pathModule.dirname(file.path);
-        replace(base, replaceCallback);
-
-        function replaceCallback(code, data) {
-            if (code === FOUND_SUCCESS) {
-                entrances.push(data);
-                replace(base, replaceCallback);
+        filePath = options.basePath ? options.basePath : pathModule.dirname(file.path);
+        fileContent = file.contents.toString(options.jsEncoding);
+        fileRegexp = new RegExp(TEMPLATE_URL_PATTERN, 'g');
+        fileEntrances = [];
+        filePipe = this;
+        fileCallback = function() {
+            if (fileEntrances.length) {
+                file.contents = joinParts(fileContent, fileEntrances);
             }
+            cb(null, file);
+        };
 
-            else if (code === FOUND_ERROR) {
-                var msg = data;
-
-                if (options.skipErrors) {
-                    gutil.log(
-                        PLUGIN_NAME, 
-                        gutil.colors.yellow('[Warning]'),
-                        gutil.colors.magenta(msg)
-                    );
-                    replace(base, replaceCallback);
-                } else {
-                    pipe.emit('error', new PluginError(PLUGIN_NAME, msg));
-                }
-            }
-
-            else if (code === FOUND_IGNORE) {
-                gutil.log(
-                    PLUGIN_NAME,
-                    gutil.colors.yellow('[Template ignored]'),
-                    gutil.colors.blue(data.path),
-                    'maximum size reached',
-                    gutil.colors.magenta(data.size + ' bytes')
-                );
-                replace(base, replaceCallback);
-            }
-
-            else if (code === CODE_EXIT) {
-                if (entrances.length) {
-                    file.contents = joinParts(entrances);
-                }
-                cb(null, file);
-            }
-        }
+        replaceNext();
     }
 
     return through.obj(transform);
