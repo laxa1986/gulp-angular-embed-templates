@@ -1,0 +1,8 @@
+<todo-cmp [model]="todo" (complete)="onCompletingTodo(todo)">
+    <input [(ngModel)]="todo.text"></input>
+    <video-player #player></video-player>
+    {{index}}
+    <div *ngFor="#item in items; var index=index">
+        {{index}
+    </div>
+</todo-cmp>
