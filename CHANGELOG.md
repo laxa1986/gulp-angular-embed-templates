@@ -1,3 +1,7 @@
+2.0.2 / 2016-01-25
+==================
+  * Fix loggin (processed files where logged even if debug = false)
+
 2.0.1 / 2016-01-25
 ==================
   * Forgot to include 'lib' directory in the list of distribution files

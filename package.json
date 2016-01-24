@@ -1,6 +1,6 @@
 {
   "name": "gulp-angular-embed-templates",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "gulp plugin to include the contents of angular templates inside directive's code",
   "main": "index.js",
   "scripts": {

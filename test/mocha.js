@@ -119,7 +119,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should skip errors if particular flag specified', function (done) {
-        sut = embedTemplates({skipErrors: true});
+        sut = embedTemplates({skipErrors: true, debug: true});
         var fakeFile = buildFakeFile(JSON.stringify({
             templateUrl: 'hello-world-template.html',
             l2: {templateUrl: 'hello-world-template2.html'},
@@ -134,7 +134,7 @@ describe('gulp-angular-embed-templates', function () {
 
     it('should use basePath to find the templates if specified', function (done) {
         // TODO: this is the path on my local machine
-        sut = embedTemplates({ basePath: testDir });
+        sut = embedTemplates({basePath: testDir, debug: true});
         var entry = JSON.stringify({
             templateUrl: '/cases/hello-world/hello-world-template.html'
         });
@@ -148,7 +148,7 @@ describe('gulp-angular-embed-templates', function () {
 
     it('should ignore files bigger than the maxSize specified', function (done) {
         var tplStats = fs.statSync(testDir + '/cases/hello-world/hello-world-template.html');
-        sut = embedTemplates({maxSize: tplStats.size - 1});
+        sut = embedTemplates({maxSize: tplStats.size - 1, debug: true});
         var entry = JSON.stringify({
             templateUrl: 'hello-world-template.html'
         });
@@ -162,7 +162,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should not skip errors if skipErrors not defined', function(done) {
-        sut = embedTemplates({skipErrors: false});
+        sut = embedTemplates({skipErrors: false, debug: true});
         var fakeFile = buildFakeFile(JSON.stringify({
             templateUrl: 'unexisting.html'
         }));

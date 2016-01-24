@@ -16,7 +16,7 @@ module.exports = function (options) {
         options.processors = [new AngularTemplateProcessor(), new Angular2TypeScriptTemplateProcessor()];
     }
 
-    var logger = utils.createLogger();
+    var logger = options.logger = utils.createLogger();
     if (options.debug !== true) {
         logger.debug = function () {}
     }
@@ -48,7 +48,7 @@ module.exports = function (options) {
             throw new PluginError(PLUGIN_NAME, 'Streaming not supported. particular file: ' + file.path);
         }
 
-        logger.debug('file.path: %s\n', file.path || 'fake');
+        logger.debug('\nfile.path: %s', file.path || 'fake');
 
         var pipe = this;
         processorEngine.process(file, cb, function onErr(msg) {
