@@ -4,6 +4,7 @@ var PluginError = gutil.PluginError;
 
 var ProcessorEngine = require('./lib/ProcessorEngine');
 var AngularTemplateProcessor = require('./lib/AngularTemplateProcessor');
+var Angular2TypeScriptTemplateProcessor = require('./lib/Angular2TypeScriptTemplateProcessor');
 var utils = require('./lib/utils');
 
 const PLUGIN_NAME = 'gulp-angular-embed-template';
@@ -12,7 +13,7 @@ module.exports = function (options) {
     options = options || {};
 
     if (options.processors === undefined) {
-        options.processors = [new AngularTemplateProcessor()];
+        options.processors = [new AngularTemplateProcessor(), new Angular2TypeScriptTemplateProcessor()];
     }
 
     var logger = utils.createLogger();
@@ -47,7 +48,7 @@ module.exports = function (options) {
             throw new PluginError(PLUGIN_NAME, 'Streaming not supported. particular file: ' + file.path);
         }
 
-        logger.debug('\nfile.path: %', file.path);
+        logger.debug('file.path: %s\n', file.path || 'fake');
 
         var pipe = this;
         processorEngine.process(file, cb, function onErr(msg) {

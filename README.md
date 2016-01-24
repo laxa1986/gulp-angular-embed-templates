@@ -16,7 +16,7 @@ Nearest neighbours are:
 
     npm install --save-dev gulp-angular-embed-templates
 
-## Usage
+## Usage (Angular 1.x)
 
 Given the following file structure
 
@@ -58,6 +58,45 @@ angular.module('test').directive('helloWorld', function () {
 });
 ```
 
+## Usage (Angular 2.0)
+
+Given the following file structure
+
+```javascript
+src
++-hello-world
+  |-hello-world-component.ts
+  +-hello-world-template.html
+```
+
+`hello-world-component.ts`:
+
+```javascript
+@View({
+    ...
+    templateUrl: string = 'angular2-template.html'
+})
+```
+
+`angular2-template.html`:
+
+```html
+<task-cmp [model]="task" (complete)="onCmpl(task)">
+    {{index}}
+</task-cmp>
+```
+
+*gulp-angular-embed-templates* will generate the following file:
+
+```javascript
+@View({
+    ...
+    template:string='<task-cmp [model]="task" (complete)="onCmpl(task)">{{index}}</task-cmp>'
+})
+```
+
+## In gulpfile.js (both for Angular 1.x and 2.0)
+
 Using this example gulpfile:
 
 ```javascript
@@ -65,7 +104,7 @@ var gulp = require('gulp');
 var embedTemplates = require('gulp-angular-embed-templates');
 
 gulp.task('js:build', function () {
-    gulp.src('src/scripts/**/*.js')
+    gulp.src('src/scripts/**/*.js') // or *.ts or both
         .pipe(embedTemplates())
         .pipe(gulp.dest('./dist'));
 });

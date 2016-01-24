@@ -12,7 +12,7 @@ import { Artist } from '../components/artist/artist';
 
 @View({
     directives: [RouterLink, RouterOutlet],
-    template:'<header><nav><ul><li><a [router-link]="[\'/search\']">Search</a></li></ul></nav></header><main><h1>{{title}}</h1><router-outlet></router-outlet></main>'
+    template:string='<header><nav><ul><li><a [router-link]="[\'/search\']">Search</a></li></ul></nav></header><main><h1>{{title}}</h1><router-outlet></router-outlet></main>'
 })
 
 @RouteConfig([

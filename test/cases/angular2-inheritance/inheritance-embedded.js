@@ -11,5 +11,5 @@ class Component extends Directive {
     restrict: string = "E";
     controller: Controller;
     controllerAs: string = "vm";
-    template: string = '<todo-cmp [model]="todo" (complete)="onCompletingTodo(todo)"><input [(ngModel)]="todo.text"></input><video-player #player></video-player>{{index}}<div *ngFor="#item in items; var index=index">{{index}</div></todo-cmp>';
+    template:string='<todo-cmp [model]=todo (complete)=onCompletingTodo(todo)><input [(ngModel)]=todo.text><video-player #player></video-player>{{index}}<div *ngFor="#item in items; var index=index">{{index}</div></todo-cmp>';
 }
