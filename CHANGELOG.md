@@ -1,3 +1,7 @@
+2.0.1 / 2016-01-25
+==================
+  * Forgot to include 'lib' directory in the list of distribution files
+
 2.0.0 / 2016-01-24
 ==================
   * Support typescript syntax templateUrl: string = "template.html"
