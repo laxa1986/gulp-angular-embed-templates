@@ -1,0 +1,3 @@
+@View({
+    templateUrl: `template.html`
+})

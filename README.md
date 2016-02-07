@@ -1,12 +1,15 @@
 # gulp-angular-embed-templates
-gulp plugin to include the contents of angular templates inside directive's code
+
+> gulp plugin to include the contents of angular templates inside directive's code
+
+----
 
 Plugin searches for `templateUrl: {template url}` and replace it with `template: {minified template content}`. To archive this template first minified with [minimize](https://www.npmjs.com/package/minimize)
 
 Nearest neighbours are:
 
-*   gulp-angular-templates - good for single page applications, combine all templates in one module. *gulp-angular-embed-templates* is better for **multi page applications**, where different pages use different set of angular directives so combining all templates in one is not an option. For single page applications they are similar but *angular-inject-templates* doesn't forces you to change your code for using some additional module: just replace template reference with the template code.
-*   gulp-include-file - can be used for the same purpose (file include) with *minimize* plugin as transform functions. *gulp-angular-embed-templates* do all of this out of the box.
+*   *gulp-angular-templates* - good for single page applications, combine all templates in one module. *gulp-angular-embed-templates* is better for **multi page applications**, where different pages use different set of angular directives so combining all templates in one is not an option. For single page applications they are similar but *angular-inject-templates* doesn't forces you to change your code for using some additional module: just replace template reference with the template code.
+*   *gulp-include-file* - can be used for the same purpose (file include) with *minimize* plugin as transform functions. *gulp-angular-embed-templates* do all of this out of the box.
 
 ## Versions / Release Notes
 
@@ -45,6 +48,19 @@ angular.module('test').directive('helloWorld', function () {
 <strong>
     Hello world!
 </strong>
+```
+
+`gulpfile.js`:
+
+```javascript
+var gulp = require('gulp');
+var embedTemplates = require('gulp-angular-embed-templates');
+
+gulp.task('js:build', function () {
+    gulp.src('src/scripts/**/*.js')
+        .pipe(embedTemplates())
+        .pipe(gulp.dest('./dist'));
+});
 ```
 
 *gulp-angular-embed-templates* will generate the following file:
@@ -86,6 +102,19 @@ src
 </task-cmp>
 ```
 
+`gulpfile.js`:
+
+```javascript
+var gulp = require('gulp');
+var embedTemplates = require('gulp-angular-embed-templates');
+
+gulp.task('js:build', function () {
+    gulp.src('src/scripts/**/*.ts') // also can use *.js files
+        .pipe(embedTemplates({angularVersion:'2.x'}))
+        .pipe(gulp.dest('./dist'));
+});
+```
+
 *gulp-angular-embed-templates* will generate the following file:
 
 ```javascript
@@ -95,58 +124,51 @@ src
 })
 ```
 
-## In gulpfile.js (both for Angular 1.x and 2.0)
-
-Using this example gulpfile:
-
-```javascript
-var gulp = require('gulp');
-var embedTemplates = require('gulp-angular-embed-templates');
-
-gulp.task('js:build', function () {
-    gulp.src('src/scripts/**/*.js') // or *.ts or both
-        .pipe(embedTemplates())
-        .pipe(gulp.dest('./dist'));
-});
-```
 **Note**: call _embedTemplates_ before source maps initialization.
 
 ## API
 
 ### embedTemplates(options)
 
-#### options.minimize
-Type: `Object`
-Default value: {parser: customParser}
+#### options.sourceType
+Type: `String`. Default value: 'js'. Available values:
+- 'js' both for Angular 1.x and Angular 2.x JavaScript syntax `templateUrl: 'path'`
+- 'ts' for Angular 2.x TypeScript syntax `@View({templateUrl: string = 'path'})`
 
-settings to pass in minimize plugin. Please see all settings on [minimize official page](https://www.npmjs.com/package/minimize)
+#### options.basePath
+Type: `String`. By default plugin use path specified in 'templateUrl' as a relative path to corresponding '.js' file (file with 'templateUrl'). This option allow to specify another basePath to search templates as 'basePath'+'templateUrl'
+
+#### skip one template embedding
+The easiest way to skip one concrete is just add some comment like /*!*/ between templateUrl and template path, like this: `templateUrl: /*!*/ '/template-path.html'`
+
+#### options.skipFiles
+Type: `RegExp` or `Function`. By default: do not skip any files. RegExp can test file name to skip template embedding, but this file still be passed in general gulp pipe and be visible for all follow plugins. Function can be used for more detail filtering. Example: `function(file) {return file.path.endsWith('-skip-directive.js');}`
+
+#### options.skipTemplate
+Type: `RegExp` or `Function`. By default: do not skip any templates. RegExp can test concrete templateUrl to skip it (like `/\-large\.html$/`). Function can be used for more detail filtering. Example: `function(templatePath, fileContext) {return templatePath.endsWith('-large.html');}`
+
+#### options.minimize
+Type: `Object`. Default value: {parser: customParser}
+
+settings to pass in minimize plugin. Please see all settings on [minimize official page](https://www.npmjs.com/package/minimize). Please don't specify key 'parser' because it already used for internal purposes
 
 #### options.skipErrors
-Type: `Boolean`
-Default value: 'false'
+Type: `Boolean`. Default value: 'false'
 
-should plugin brake on errors (file not found, error in minification) or skip errors and go to next template
+should plugin brake on errors (file not found, error in minification) or skip errors (warn in logs) and go to next template
 
 #### options.jsEncoding
-Type: `String`
-Default value: 'utf-8'
+Type: `String`. Default value: 'utf-8'
 
-js code files encoding (angular directives)
+js files encoding (angular directives)
 
 #### options.templateEncoding
-Type: `String`
-Default value: 'utf-8'
+Type: `String`. Default value: 'utf-8'
 
 angular template files encoding
 
-#### options.basePath
-Type: `String`
-By default plugin use path specified in 'templateUrl' as a relative path to corresponding '.js' file (file with 'templateUrl')
-This option allow to specify another basePath to search templates as 'basePath'+'templateUrl'
-
 #### options.maxSize
-Type: `Number`
-Default value: Null
+Type: `Number`. Not specified by default (templates of any size allowed)
 
 define the max size limit in bytes for the template be embeded. Ignore templates which size exceed this limit
 

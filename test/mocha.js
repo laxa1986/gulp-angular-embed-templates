@@ -29,18 +29,21 @@ describe('gulp-angular-embed-templates', function () {
     }
 
     /**
-     * test that after embedding template in `originalFile` it content equals to `expectEmbedFile`
-     * @param {String} originalFile original file path
-     * @param {String} expectEmbedFile expected file path
+     * test that after embedding template in `dirName.directive` it content equals to `dirName.embedded`
+     * @param {String} dirName test case directory name
      * @param {Function} done mocha 'done' handler
+     * @param {Object} [config]
      */
-    function testEmbed(originalFile, expectEmbedFile, done) {
+    function testEmbed(dirName, done, config) {
         var testCases = testDir + '/cases/';
-        var directiveFile = readFile(testCases + originalFile);
-        var embeddedFile = readFile(testCases + expectEmbedFile);
+        var directiveFile = readFile(testCases + dirName + '/directive.js');
+        var embeddedFile = readFile(testCases + dirName + '/embedded.js');
 
+        if (config === undefined) config = {};
+        if (config.debug === undefined) config.debug = true;
+
+        sut = embedTemplates(config);
         sut.write(directiveFile);
-
         sut.once('data', function (file) {
             assert(file.isBuffer());
             assert.equal(file.contents.toString('utf8'), embeddedFile.contents.toString('utf8'));
@@ -65,7 +68,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with single quoted template paths', function (done) {
-        var fakeFile = buildFakeFile('templateUrl: \'hello-world-template.html\'');
+        var fakeFile = buildFakeFile('templateUrl: \'template.html\'');
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -74,7 +77,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with double quoted template paths', function (done) {
-        var fakeFile = buildFakeFile('templateUrl: "hello-world-template.html"');
+        var fakeFile = buildFakeFile('templateUrl: "template.html"');
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -83,7 +86,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with new quotes ` in template paths', function (done) {
-        var fakeFile = buildFakeFile('templateUrl: `hello-world-template.html`');
+        var fakeFile = buildFakeFile('templateUrl: `template.html`');
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -92,7 +95,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with single quoted templateUrl key', function (done) {
-        var fakeFile = buildFakeFile('\'templateUrl\': \'hello-world-template.html\'');
+        var fakeFile = buildFakeFile('\'templateUrl\': \'template.html\'');
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -101,7 +104,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with double quoted templateUrl key', function (done) {
-        var fakeFile = buildFakeFile('"templateUrl": \'hello-world-template.html\'');
+        var fakeFile = buildFakeFile('"templateUrl": \'template.html\'');
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -110,7 +113,7 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should dial with templateUrl {SPACES} : {SPACES} {url}', function (done) {
-        var fakeFile = buildFakeFile('"templateUrl" \t\r\n:\r\n\t  \'hello-world-template.html\'');
+        var fakeFile = buildFakeFile('"templateUrl" \t\r\n:\r\n\t  \'template.html\'');
         sut.write(fakeFile);
         sut.once('data', function (file) {
             assert.equal(file.contents.toString('utf8'), 'template:\'<strong>Hello World!</strong>\'');
@@ -119,15 +122,16 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should skip errors if particular flag specified', function (done) {
-        sut = embedTemplates({skipErrors: true, debug: true});
-        var fakeFile = buildFakeFile(JSON.stringify({
-            templateUrl: 'hello-world-template.html',
-            l2: {templateUrl: 'hello-world-template2.html'},
-            l3: {templateUrl: 'hello-world-template.html'}
-        }));
-        sut.write(fakeFile);
-        sut.once('data', function (file) {
-            assert.equal(file.contents.toString('utf8'), '{template:\'<strong>Hello World!</strong>\',"l2":{"templateUrl":"hello-world-template2.html"},"l3":{template:\'<strong>Hello World!</strong>\'}}');
+        testEmbed('skip-errors', done, {skipErrors: true});
+    });
+
+    it('should not skip errors if skipErrors not defined', function(done) {
+        testEmbed('skip-errors');
+
+        sut.once('error', function(error) {
+            assert.instanceOf(error, PluginError, 'error should be gulp PluginError');
+            assert.equal(error.plugin, 'gulp-angular-embed-template');
+            expect(error.message).to.startWith('Can\'t read template file');
             done();
         });
     });
@@ -136,7 +140,7 @@ describe('gulp-angular-embed-templates', function () {
         // TODO: this is the path on my local machine
         sut = embedTemplates({basePath: testDir, debug: true});
         var entry = JSON.stringify({
-            templateUrl: '/cases/hello-world/hello-world-template.html'
+            templateUrl: '/cases/hello-world/template.html'
         });
         var fakeFile = buildFakeFile(entry);
         sut.write(fakeFile);
@@ -147,62 +151,59 @@ describe('gulp-angular-embed-templates', function () {
     });
 
     it('should ignore files bigger than the maxSize specified', function (done) {
-        var tplStats = fs.statSync(testDir + '/cases/hello-world/hello-world-template.html');
-        sut = embedTemplates({maxSize: tplStats.size - 1, debug: true});
-        var entry = JSON.stringify({
-            templateUrl: 'hello-world-template.html'
-        });
-        var fakeFile = buildFakeFile(entry);
-        var contentBefore = fakeFile.contents.toString('utf8');
-        sut.write(fakeFile);
-        sut.once('data', function (file) {
-            assert.equal(file.contents.toString('utf8'), contentBefore);
-            done();
-        });
-    });
-
-    it('should not skip errors if skipErrors not defined', function(done) {
-        sut = embedTemplates({skipErrors: false, debug: true});
-        var fakeFile = buildFakeFile(JSON.stringify({
-            templateUrl: 'unexisting.html'
-        }));
-        sut.write(fakeFile);
-        sut.once('error', function(error) {
-            assert.instanceOf(error, PluginError, 'error should be gulp PluginError');
-            assert.equal(error.plugin, 'gulp-angular-embed-template');
-            expect(error.message).to.startWith('Can\'t read template file');
-            done();
-        });
+        testEmbed('max-size', done, {maxSize: 400})
     });
 
     it('should embed template with quotes properly', function(done) {
-        testEmbed(
-            'hard-attributes/hard-attributes-directive.js',
-            'hard-attributes/hard-attributes-embedded.js', done
-        );
+        testEmbed('hard-attributes', done);
     });
 
     it('should embed hello-world template', function (done) {
-        testEmbed(
-            'hello-world/hello-world-directive.js',
-            'hello-world/hello-world-embedded.js', done);
+        testEmbed('hello-world', done);
     });
 
     it('should embed Angular 2.0 templates with <a [router-link]="[\'/search\']">Search</a>', function (done) {
-        testEmbed(
-            'angular2-typescript/angular2-component.ts',
-            'angular2-typescript/angular2-embedded.ts', done);
+        testEmbed('angular2-typescript', done, {sourceType: 'ts'});
     });
 
     it('should not change attributes case (for Angular2.0 beta)', function (done) {
-        testEmbed(
-            'angular2-ngIf/angular2-ngIf-component.js',
-            'angular2-ngIf/angular2-ngIf-embedded.js', done);
+        testEmbed('angular2-ngIf', done);
     });
 
     it('should embed template when find pattern "templateUrl: string = \'path\'"', function (done) {
-        testEmbed(
-            'angular2-inheritance/inheritance-component.js',
-            'angular2-inheritance/inheritance-embedded.js', done);
+        testEmbed('angular2-inheritance', done, {sourceType: 'ts'});
+    });
+
+    it('should skip files if config.skipFiles function specified', function(done) {
+        testEmbed('skip-file', done, {skipFiles: function(file) {
+            var path = file.path;
+            return path.endsWith('skip-file/directive.js');
+        }});
+    });
+
+    it('should skip files if config.skipFiles pattern specified', function(done) {
+        testEmbed('skip-file', done, {skipFiles: /skip-file\/directive\.js$/});
+    });
+
+    it('should skip certain template if config.skipTemplates regexp specified', function(done) {
+        testEmbed('skip-template', done, {skipTemplates: /\-large\.html$/});
+    });
+
+    it('should skip certain template if config.skipTemplates function specified', function(done) {
+        testEmbed('skip-template', done, {skipTemplates: function(templatePath, fileContext) {
+            return templatePath.endsWith('-large.html') && fileContext.path.indexOf('skip-template') !== -1;
+        }});
+    });
+
+    it('should skip certain template if /*!*/ comment specified', function(done) {
+        testEmbed('skip-comment', done);
+    });
+
+    it('should embed only Angular1.x templates if sourceType "js" specified', function(done) {
+        testEmbed('angular2-ignore', done, {sourceType: 'js'});
+    });
+
+    it('should embed only Angular2.x templates if sourceType "ts" specified', function(done) {
+        testEmbed('skip-file', done, {sourceType: 'ts'});
     });
 });

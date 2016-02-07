@@ -3,8 +3,8 @@ var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 
 var ProcessorEngine = require('./lib/ProcessorEngine');
-var AngularTemplateProcessor = require('./lib/AngularTemplateProcessor');
-var Angular2TypeScriptTemplateProcessor = require('./lib/Angular2TypeScriptTemplateProcessor');
+var Angular1Processor = require('./lib/Angular1Processor');
+var Angular2TypeScriptTemplateProcessor = require('./lib/Angular2TypeScriptProcessor');
 var utils = require('./lib/utils');
 
 const PLUGIN_NAME = 'gulp-angular-embed-template';
@@ -12,14 +12,22 @@ const PLUGIN_NAME = 'gulp-angular-embed-template';
 module.exports = function (options) {
     options = options || {};
 
-    if (options.processors === undefined) {
-        options.processors = [new AngularTemplateProcessor(), new Angular2TypeScriptTemplateProcessor()];
+    var sourceType = options.sourceType;
+    delete options.sourceType;
+    switch (sourceType) {
+        case 'ts':
+            options.processors = [new Angular2TypeScriptTemplateProcessor()];
+            break;
+        case 'js':
+        default:
+            options.processors = [new Angular1Processor()];
     }
 
     var logger = options.logger = utils.createLogger();
     if (options.debug !== true) {
         logger.debug = function () {}
     }
+    delete options.debug;
     logger.warn = function(msg) {
         gutil.log(
             PLUGIN_NAME,
@@ -27,6 +35,20 @@ module.exports = function (options) {
             gutil.colors.magenta(msg)
         );
     };
+
+    var skipFiles = options.skipFiles || function() {return false;};
+    delete options.skipFiles;
+    if (typeof skipFiles === 'function') {
+        /* OK */
+    } else if (skipFiles instanceof RegExp) {
+        var regexp = skipFiles;
+        skipFiles = function(file) {
+            return regexp.test(file.path);
+        }
+    } else {
+        logger.warn('"skipFiles" options should be either function or regexp, actual type is ' + typeof skipFiles);
+        skipFiles = function() {return false;}
+    }
 
     var processorEngine = new ProcessorEngine();
     processorEngine.init(options);
@@ -48,7 +70,13 @@ module.exports = function (options) {
             throw new PluginError(PLUGIN_NAME, 'Streaming not supported. particular file: ' + file.path);
         }
 
-        logger.debug('\nfile.path: %s', file.path || 'fake');
+        logger.debug('\n\nfile.path: %s', file.path || 'fake');
+
+        if (skipFiles(file)) {
+            logger.info('skip file %s', file.path);
+            cb(null, file);
+            return;
+        }
 
         var pipe = this;
         processorEngine.process(file, cb, function onErr(msg) {

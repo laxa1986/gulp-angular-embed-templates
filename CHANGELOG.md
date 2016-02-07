@@ -1,6 +1,16 @@
+3.0.0 (next)
+==================
+  * ability to embed ng-include
+  * update javadoc with comparison with gulp-angular-templatecache
+
+2.1.0
+==================
+  * option to specify source type: javascript or typescript
+  * 3 ways to skip embedding: `skipFile` function, `skipTemplate` function and special comment `/*!*/`
+
 2.0.2 / 2016-01-25
 ==================
-  * Fix loggin (processed files where logged even if debug = false)
+  * Fix logging (processed files where logged even if debug = false)
 
 2.0.1 / 2016-01-25
 ==================

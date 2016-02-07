@@ -11,5 +11,5 @@ class Component extends Directive {
     restrict: string = "E";
     controller: Controller;
     controllerAs: string = "vm";
-    templateUrl: string = "inheritance-template.html";
+    templateUrl: string = "template.html";
 }
