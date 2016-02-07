@@ -3,6 +3,10 @@
   * ability to embed ng-include
   * update javadoc with comparison with gulp-angular-templatecache
 
+2.1.1
+==================
+  * fix typo in README.md file
+
 2.1.0
 ==================
   * option to specify source type: javascript or typescript

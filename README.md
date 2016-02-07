@@ -110,7 +110,7 @@ var embedTemplates = require('gulp-angular-embed-templates');
 
 gulp.task('js:build', function () {
     gulp.src('src/scripts/**/*.ts') // also can use *.js files
-        .pipe(embedTemplates({angularVersion:'2.x'}))
+        .pipe(embedTemplates({sourceType:'ts'}))
         .pipe(gulp.dest('./dist'));
 });
 ```
@@ -139,7 +139,7 @@ Type: `String`. Default value: 'js'. Available values:
 Type: `String`. By default plugin use path specified in 'templateUrl' as a relative path to corresponding '.js' file (file with 'templateUrl'). This option allow to specify another basePath to search templates as 'basePath'+'templateUrl'
 
 #### skip one template embedding
-The easiest way to skip one concrete is just add some comment like /*!*/ between templateUrl and template path, like this: `templateUrl: /*!*/ '/template-path.html'`
+The easiest way to skip one concrete is just add some comment like `/*!*/` between templateUrl and template path, like this: `templateUrl: /*!*/ '/template-path.html'`
 
 #### options.skipFiles
 Type: `RegExp` or `Function`. By default: do not skip any files. RegExp can test file name to skip template embedding, but this file still be passed in general gulp pipe and be visible for all follow plugins. Function can be used for more detail filtering. Example: `function(file) {return file.path.endsWith('-skip-directive.js');}`
