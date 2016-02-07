@@ -3,11 +3,11 @@
   * ability to embed ng-include
   * update javadoc with comparison with gulp-angular-templatecache
 
-2.1.1
+2.1.2 / 2016-02-07
 ==================
   * fix typo in README.md file
 
-2.1.0
+2.1.0 / 2016-02-07
 ==================
   * option to specify source type: javascript or typescript
   * 3 ways to skip embedding: `skipFile` function, `skipTemplate` function and special comment `/*!*/`

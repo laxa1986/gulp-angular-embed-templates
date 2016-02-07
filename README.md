@@ -144,7 +144,7 @@ The easiest way to skip one concrete is just add some comment like `/*!*/` betwe
 #### options.skipFiles
 Type: `RegExp` or `Function`. By default: do not skip any files. RegExp can test file name to skip template embedding, but this file still be passed in general gulp pipe and be visible for all follow plugins. Function can be used for more detail filtering. Example: `function(file) {return file.path.endsWith('-skip-directive.js');}`
 
-#### options.skipTemplate
+#### options.skipTemplates
 Type: `RegExp` or `Function`. By default: do not skip any templates. RegExp can test concrete templateUrl to skip it (like `/\-large\.html$/`). Function can be used for more detail filtering. Example: `function(templatePath, fileContext) {return templatePath.endsWith('-large.html');}`
 
 #### options.minimize
