@@ -3,6 +3,10 @@
   * ability to embed ng-include
   * update javadoc with comparison with gulp-angular-templatecache
 
+2.2.0 / 2016-02-20
+  * Fix conceptual mistake made in 2.1.0, now syntax `templateUrl: path` works just fine for sourceType: 'ts'
+  * Extend usage examples
+
 2.1.3 / 2016-02-20
   * fix major mistake in README.md file with Angular 2.x example
 

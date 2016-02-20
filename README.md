@@ -94,6 +94,11 @@ class Component extends Directive {
   controllerAs: string = "vm";
   templateUrl: string = "angular2-template.html";
 }
+// or
+@View({
+    ...
+    templateUrl: 'angular2-template.html'
+})
 ```
 
 `angular2-template.html`:
@@ -126,6 +131,11 @@ class Component extends Directive {
   controllerAs: string = "vm";
   template:string='<task-cmp [model]="task" (complete)="onCmpl(task)">{{index}}</task-cmp>';
 }
+// or
+@View({
+    ...
+    template:'<task-cmp [model]="task" (complete)="onCmpl(task)">{{index}}</task-cmp>'
+})
 ```
 
 **Note**: call _embedTemplates_ before source maps initialization.
@@ -136,8 +146,8 @@ class Component extends Directive {
 
 #### options.sourceType
 Type: `String`. Default value: 'js'. Available values:
-- 'js' both for Angular 1.x and Angular 2.x JavaScript syntax `templateUrl: 'path'`
-- 'ts' for Angular 2.x TypeScript syntax `class Component {templateUrl: string = 'path'}`
+- 'js' both for Angular 1.x syntax `templateUrl: 'path'` and Angular 2.x syntax `@View({templateUrl: 'path'})`
+- 'ts' additionally support Angular 2.x TypeScript syntax `class Component {templateUrl: string = 'path'}`
 
 #### options.basePath
 Type: `String`. By default plugin use path specified in 'templateUrl' as a relative path to corresponding '.js' file (file with 'templateUrl'). This option allow to specify another basePath to search templates as 'basePath'+'templateUrl'

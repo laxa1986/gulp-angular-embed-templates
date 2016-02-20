@@ -16,7 +16,7 @@ module.exports = function (options) {
     delete options.sourceType;
     switch (sourceType) {
         case 'ts':
-            options.processors = [new Angular2TypeScriptTemplateProcessor()];
+            options.processors = [new Angular1Processor(), new Angular2TypeScriptTemplateProcessor()];
             break;
         case 'js':
         default:
