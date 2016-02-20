@@ -206,4 +206,12 @@ describe('gulp-angular-embed-templates', function () {
     it('should embed only Angular2.x templates if sourceType "ts" specified', function(done) {
         testEmbed('skip-file', done, {sourceType: 'ts'});
     });
+
+    it('should embed templateUrl: path in Angular2.x just fine', function(done) {
+        testEmbed('angular2-templateUrl', done);
+    });
+
+    it('should embed templateUrl: strign = \'path\' in class definition', function(done) {
+        testEmbed('angular2-class', done, {sourceType: 'ts'});
+    })
 });

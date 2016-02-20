@@ -88,10 +88,12 @@ src
 `hello-world-component.ts`:
 
 ```javascript
-@View({
-    ...
-    templateUrl: string = 'angular2-template.html'
-})
+class Component extends Directive {
+  restrict: string = "E";
+  controller: Controller;
+  controllerAs: string = "vm";
+  templateUrl: string = "angular2-template.html";
+}
 ```
 
 `angular2-template.html`:
@@ -118,10 +120,12 @@ gulp.task('js:build', function () {
 *gulp-angular-embed-templates* will generate the following file:
 
 ```javascript
-@View({
-    ...
-    template:string='<task-cmp [model]="task" (complete)="onCmpl(task)">{{index}}</task-cmp>'
-})
+class Component extends Directive {
+  restrict: string = "E";
+  controller: Controller;
+  controllerAs: string = "vm";
+  template:string='<task-cmp [model]="task" (complete)="onCmpl(task)">{{index}}</task-cmp>';
+}
 ```
 
 **Note**: call _embedTemplates_ before source maps initialization.
@@ -133,7 +137,7 @@ gulp.task('js:build', function () {
 #### options.sourceType
 Type: `String`. Default value: 'js'. Available values:
 - 'js' both for Angular 1.x and Angular 2.x JavaScript syntax `templateUrl: 'path'`
-- 'ts' for Angular 2.x TypeScript syntax `@View({templateUrl: string = 'path'})`
+- 'ts' for Angular 2.x TypeScript syntax `class Component {templateUrl: string = 'path'}`
 
 #### options.basePath
 Type: `String`. By default plugin use path specified in 'templateUrl' as a relative path to corresponding '.js' file (file with 'templateUrl'). This option allow to specify another basePath to search templates as 'basePath'+'templateUrl'
@@ -170,7 +174,7 @@ angular template files encoding
 #### options.maxSize
 Type: `Number`. Not specified by default (templates of any size allowed)
 
-define the max size limit in bytes for the template be embeded. Ignore templates which size exceed this limit
+define the max size limit in bytes for the template be embedded. Ignore templates which size exceed this limit
 
 ## License
 This module is released under the MIT license.
