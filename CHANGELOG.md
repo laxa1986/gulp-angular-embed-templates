@@ -3,6 +3,10 @@
   * ability to embed ng-include
   * update javadoc with comparison with gulp-angular-templatecache
 
+2.3.0 / 2016-08-08
+==================
+  * Keep attribute quotes by default (add quotes if they missed in source code). Removing quotes caused serious of issues with bindings. You can get old behaviour by specifying config property minimize: {quotes: false}
+
 2.2.1 / 2016-08-08
 ==================
   * Add support of old Node versions (without native Object.assign)

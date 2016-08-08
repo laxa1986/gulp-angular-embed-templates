@@ -11,7 +11,7 @@ testModule.directive('helloWorld', function () {
 testModule.directive('helloWorld', function () {
     return {
         restrict: 'E',
-        template:'<a href=#>Hello World!</a>'
+        template:'<a href="#">Hello World!</a>'
     };
 });
 

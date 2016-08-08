@@ -209,5 +209,13 @@ describe('gulp-angular-embed-templates', function () {
 
     it('should embed templateUrl: strign = \'path\' in class definition', function(done) {
         testEmbed('angular2-class', done, {sourceType: 'ts'});
+    });
+
+    it('should keep quotes if html attribute has space', function (done) {
+        testEmbed('img-attributes', done);
+    });
+
+    it('should allow to remove attribute quotes', function (done) {
+        testEmbed('attr-quotes-remove', done, {minimize:{quotes: false}});
     })
 });
