@@ -27,14 +27,14 @@
   "homepage": "https://github.com/laxa1986/gulp-angular-embed-templates",
   "dependencies": {
     "gulp-util": "^3.0.6",
-    "minimize": "^1.8.1",
+    "minimize": "^2.0.0",
     "through2": "^2.0.1",
-    "htmlparser2": "~3.9.0"
+    "htmlparser2": "~3.9.1"
   },
   "devDependencies": {
-    "mocha": "^2.4.5",
+    "mocha": "^3.0.2",
     "chai": "^3.5.0",
-    "chai-string": "^1.1.6"
+    "chai-string": "^1.2.0"
   },
   "files": [
     "package.json",
